@@ -110,18 +110,19 @@ done
 echo ""
 
 # ================================================================
-# 先回到默认分支
+# 在子模块中切换分支（不影响主项目）
 # ================================================================
-log_info "回到默认分支: ${DEFAULT_BRANCH}"
-if ! git checkout "${DEFAULT_BRANCH}" 2>/dev/null; then
+log_info "在子模块 qt-compile-pipeline 中切换分支"
+
+# 先回到默认分支
+log_info "子模块回到默认分支: ${DEFAULT_BRANCH}"
+if ! git -C "${QT_PIPELINE_DIR}" checkout "${DEFAULT_BRANCH}" 2>/dev/null; then
     die "无法切换到默认分支 ${DEFAULT_BRANCH}"
 fi
-log_info "当前分支: $(git symbolic-ref --short HEAD)"
+log_info "子模块当前分支: $(git -C "${QT_PIPELINE_DIR}" symbolic-ref --short HEAD)"
 echo ""
 
-# ================================================================
 # 创建编译分支
-# ================================================================
 if [[ -n "${CUSTOM_BRANCH_NAME}" ]]; then
     BRANCH_NAME="${CUSTOM_BRANCH_NAME}"
 else
@@ -129,15 +130,19 @@ else
 fi
 
 # 检查分支是否已存在
-if git rev-parse --verify "${BRANCH_NAME}" >/dev/null 2>&1; then
+if git -C "${QT_PIPELINE_DIR}" rev-parse --verify "${BRANCH_NAME}" >/dev/null 2>&1; then
     log_warn "分支 ${BRANCH_NAME} 已存在，删除旧分支..."
-    git branch -D "${BRANCH_NAME}"
+    git -C "${QT_PIPELINE_DIR}" branch -D "${BRANCH_NAME}"
 fi
 
 # 创建并切换到新分支
-log_info "创建新分支: ${BRANCH_NAME}"
-git checkout -b "${BRANCH_NAME}"
-log_info "当前分支: $(git symbolic-ref --short HEAD)"
+log_info "子模块创建新分支: ${BRANCH_NAME}"
+git -C "${QT_PIPELINE_DIR}" checkout -b "${BRANCH_NAME}"
+log_info "子模块当前分支: $(git -C "${QT_PIPELINE_DIR}" symbolic-ref --short HEAD)"
+echo ""
+
+# 显示主项目分支状态（未改变）
+log_info "主项目分支保持不变: $(git symbolic-ref --short HEAD)"
 echo ""
 
 # ================================================================
