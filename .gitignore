@@ -1,3 +1,7 @@
 # Outputs
 out/
+
+# Host Third Parties
+host/
+
 .claude
