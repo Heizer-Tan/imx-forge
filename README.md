@@ -14,6 +14,7 @@
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](LICENSE)
 [![WSL2](https://img.shields.io/badge/WSL2-Tested%20%26%20OK-brightgreen?style=flat-square)](#-wsl2-深度友好)
 [![Kernel](https://img.shields.io/badge/Kernel-linux--imx%206.12.3-blue?style=flat-square)](#-双轨内核策略)
+[![Bootloader](https://img.shields.io/badge/Bootloader-uboot--imx%202025--04-yellow?style=flat-square)](#-双轨内核策略)
 [![Board](https://img.shields.io/badge/Board-i.MX6ULL-blueviolet?style=flat-square)](#-支持的开发板)
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](#-贡献指南)
 
@@ -32,6 +33,9 @@
 ```
 
 每一步都有详细的文档和实战示例，不再是"这里略去一万字"的坑人教程。
+
+是的，甚至可以在网页上阅读！[点击🖱获得更好体验!](https://awesome-embedded-learning-studio.github.io/imx-forge/)
+
 
 ### 💻 WSL2 深度友好
 
