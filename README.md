@@ -1,57 +1,142 @@
 <div align="center">
 
-
 ```
 ██╗███╗   ███╗██╗  ██╗      ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
 ██║████╗ ████║╚██╗██╔╝      ██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
-██║██╔████╔██║ ╚███╔╝ █████╗█████╗  ██║   ██║██████╔╝██║  ███╗█████╗  
-██║██║╚██╔╝██║ ██╔██╗ ╚════╝██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝  
+██║██╔████╔██║ ╚███╔╝ █████╗█████╗  ██║   ██║██████╔╝██║  ███╗█████╗
+██║██║╚██╔╝██║ ██╔██╗ ╚════╝██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝
 ██║██║ ╚═╝ ██║██╔╝ ██╗      ██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗
 ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝      ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
 ```
 
-**面向 NXP i.MX6ULL 开发板的开源锻造工坊 —— 补丁、构建脚本与教程文档，从正点原子阿尔法到自制板，一次集结，随时开打。**
-
-🌐 语言: **中文** | [English](assets/README_EN.md)
+**面向 NXP i.MX6ULL 的嵌入式 Linux 开发工坊 —— 从工具链到 QT 应用的完整学习路径**
 
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](LICENSE)
-[![Boards](https://img.shields.io/badge/Boards-IMX6ULL-blue?style=flat-square)](#支持的开发板)
-[![Kernel Track](https://img.shields.io/badge/Kernel-linux--imx_%7C_mainline_(WIP)-blueviolet?style=flat-square)](#技术路线)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](#贡献方式)
-[![WSL OK](https://img.shields.io/badge/WSL-Test-OK-brightgreen?style=flat-square)](#贡献方式)
+[![WSL2](https://img.shields.io/badge/WSL2-Tested%20%26%20OK-brightgreen?style=flat-square)](#-wsl2-深度友好)
+[![Kernel](https://img.shields.io/badge/Kernel-linux--imx%206.12.3-blue?style=flat-square)](#-双轨内核策略)
+[![Board](https://img.shields.io/badge/Board-i.MX6ULL-blueviolet?style=flat-square)](#-支持的开发板)
+[![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](#-贡献指南)
+
 </div>
 
 ---
 
-## ⚒️ 什么是 IMX-Forge？
+## ✨ 为什么选择 IMX-Forge？
 
-IMX-Forge 是一个**个人维护的开源工作空间**，专注于将 NXP i.MX6ULL 平台开发板快速引导成可运行的嵌入式系统。
+### 📚 完整的教程链条
 
-它把那些通常散落在 NXP 官方 BSP、论坛帖子、正点原子教程、深夜串口调试记录里的内容统一整理起来：
+我们的嵌入式学习和开发链条一步不落（虽然后面几个仍然再火热WIP）
 
-- 🩹 **内核与 U-Boot 补丁** —— 基于 `format-patch + series` 管理，区分 `[linux-imx]` 与 `[mainline]` 双轨
-- 🛠️ **构建工具脚本** —— 统一封装 build、flash、menuconfig 与环境初始化流程
-- 📖 **教程文档** —— 从工具链到 U-Boot 到内核的完整学习路径
-- 📦 **第三方源码** —— Git Submodule 管理 U-Boot NXP fork
+```
+工具链安装 → U-Boot 移植 → 内核配置 → Rootfs 构建 → 驱动开发 → QT 应用
+```
 
-> 不再翻找厂商 Wiki。`clone → source → build → flash` —— 这是约定。
+每一步都有详细的文档和实战示例，不再是"这里略去一万字"的坑人教程。
 
-> 参考 [document/todo](document/todo/) 了解项目计划与待办事项
+### 💻 WSL2 深度友好
+
+> **Windows 用户首选！** 项目在 WSL2 环境下完整测试通过
+
+- ✅ Mirrored 网络模式 —— 直接访问开发板，无需复杂转发
+- ✅ USB 设备直通指南 —— 串口、烧录一步到位
+- ✅ TFTP/NFS 开发调试方案 —— 网络启动提高开发效率
+
+不再需要双系统或虚拟机，Windows 下也能愉快地搞嵌入式开发！
+
+### 🎨 QT / 图形界面支持
+
+集成 `qt-compile-pipeline`，快速搭建嵌入式 GUI 开发环境：
+
+- 🖥️ QT6 交叉编译支持
+- 📦 触摸屏驱动（GT911 等）
+- 🎯 完整的 QT 示例工程
+
+### 🔄 双轨内核策略
+
+```
+patches/
+├── [linux-imx]   NXP BSP 6.12.3 ← 当前推荐
+└── [mainline]    上游内核      ← WIP 🚧
+```
+
+稳定优先，长期向上游靠拢。
+
+### 🛠️ 完整的开发环境
+
+```
+IMX-Forge/
+├── scripts/          # 一键构建脚本
+├── third_party/      # U-Boot / Linux / BusyBox 子模块
+├── patches/          # 双轨补丁管理
+├── driver/           # 设备树和驱动示例
+├── examples/         # 项目示例（QT/驱动/系统）
+├── document/         # 完整教程文档
+└── rootfs/           # NFS Rootfs
+```
+
+---
+
+## 🚀 5分钟快速体验
+
+```bash
+# 1. 克隆项目（含子模块）
+git clone --recurse-submodules https://github.com/Awesome-Embedded-Learning-Studio/imx-forge.git
+cd imx-forge
+
+# 2. 安装依赖（Ubuntu/WSL2）
+sudo apt install -y build-essential gcc make bison flex device-tree-compiler \
+    libssl-dev libncurses-dev python3-pyelftools swig picocom
+
+# 3. 安装 ARM 工具链（ARM GNU Toolchain 15.2）
+wget https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
+tar -xf arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
+sudo mv arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-linux-gnueabihf /opt/arm-gnu-toolchain
+export PATH=/opt/arm-gnu-toolchain/bin:$PATH
+
+# 4. 一键构建
+./scripts/build_helper/build-uboot.sh
+./scripts/build_helper/build-linux.sh
+./scripts/build_helper/build-busybox.sh
+
+# 5. 烧录到 SD 卡，启动！
+```
+
+> 📖 **详细指南**: [QUICK_START.md](QUICK_START.md)
+
+---
+
+## 📖 完整学习路径
+
+| 阶段 | 教程 | 内容 |
+|------|------|------|
+| 1️⃣ | [工具链教程](document/tutorial/start/01_start_from_toolchain.md) | ARM GNU Toolchain 15.2 安装与配置 |
+| 2️⃣ | [U-Boot 教程](document/tutorial/uboot/01_what_is_uboot.md) | U-Boot 原理、编译、移植、Logo 定制 |
+| 3️⃣ | [内核教程](document/tutorial/kernel) | 设备树、内核配置、驱动开发 |
+| 4️⃣ | [Rootfs 教程](document/tutorial/rootfs/01_rootfs_overview.md) | BusyBox、inittab、NFS 挂载 |
+| 5️⃣ | [实战教程](document/tutorial/practical/01_practical_overview.md) | 完整系统构建与调试 |
+| 6️⃣ | [QT 示例](examples/qt) | QT6 交叉编译与触摸屏应用 |
 
 ---
 
 ## 🎯 支持的开发板
 
-| 板卡         | 芯片     | 存储      | 状态     | 备注                  |
-| ------------ | -------- | --------- | -------- | --------------------- |
-| 正点原子阿尔法 | i.MX6ULL | eMMC / SD | 🚧 进行中 | 首要支持目标          |
-| 自制板 v1    | i.MX6ULL | eMMC / SD | 📋 规划中 | 通过 DTB Overlay 接入 |
+| 板卡 | 芯片 | 存储 | 状态 | 备注 |
+|------|------|------|------|------|
+| 正点原子阿尔法 | i.MX6ULL | eMMC / SD | 🚧 进行中 | 首要支持目标 |
+| 自制板 v1 | i.MX6ULL | eMMC / SD | 📋 规划中 | 通过 DTB Overlay 接入 |
 
 ---
 
-## 🧭 技术路线
+## 🛠️ 技术架构
 
-IMX-Forge 采用**双轨并行**策略，稳定优先，长期向上游靠拢：
+### 开发环境支持
+
+| 环境 | 状态 | 备注 |
+|------|------|------|
+| **WSL2 (Ubuntu 22.04/24.04)** | ✅ 推荐 | Windows 用户首选，需 Mirrored 网络模式 |
+| Ubuntu 24.04+ | ✅ 推荐 | 原生 Linux 环境 |
+
+### 双轨内核演进路线
 
 ```
                     ┌─────────────────────────────┐
@@ -73,13 +158,43 @@ IMX-Forge 采用**双轨并行**策略，稳定优先，长期向上游靠拢：
                     └─────────────────────────────┘
 ```
 
-补丁按来源打标区分，清晰可追溯：
+---
+
+## 📁 项目结构
 
 ```
-patches/
-├── linux-imx/          # [linux-imx] 标签，跟随 NXP BSP
-├── linux-mainline/     # [mainline]  标签，面向上游（未来）
-└── uboot/              # U-Boot 补丁集
+imx-forge/
+├── scripts/                # 构建脚本
+│   ├── build_helper/      # U-Boot / Linux / BusyBox 构建脚本
+│   ├── patch_maker.sh     # 补丁生成工具
+│   └── ...
+├── third_party/           # 第三方源码（Git Submodule）
+│   ├── uboot-imx/        # U-Boot NXP fork
+│   ├── linux-imx/        # Linux Kernel NXP BSP
+│   ├── busybox/          # BusyBox
+│   └── qt-compile-pipeline/  # QT 交叉编译流水线
+├── patches/              # 补丁文件（format-patch + series）
+│   ├── linux-imx/        # [linux-imx] 标签
+│   ├── linux-mainline/   # [mainline] 标签
+│   └── uboot/            # U-Boot 补丁
+├── driver/               # 设备树和驱动
+│   ├── device_tree/      # 设备树文件
+│   ├── led/              # LED 驱动示例
+│   └── base_driver/      # 基础驱动框架
+├── examples/             # 示例工程
+│   ├── qt/               # QT 应用示例
+│   ├── driver/           # 驱动示例
+│   ├── system/           # 系统示例
+│   └── project/          # 完整项目示例
+├── rootfs/               # 根文件系统
+│   └── nfs/              # NFS 挂载用 rootfs
+├── document/             # 完整教程文档
+│   ├── tutorial/         # 教程（工具链/U-Boot/内核/Rootfs）
+│   ├── practical/        # 实战教程
+│   └── todo/             # 项目规划
+├── out/                  # 编译输出目录
+├── develop/              # 开发工具
+└── tools/                # 辅助工具
 ```
 
 ---
@@ -87,34 +202,52 @@ patches/
 ## 🚧 当前重点方向
 
 - [ ] 正点原子阿尔法板卡支持完善（eMMC / SD 双存储路径）
-- [ ] ARM GNU Toolchain 版本锁定 + 构建环境配置
-- [ ] U-Boot 发布包构建脚本完善
+- [ ] WSL2 USB 设备直通完整指南
+- [ ] QT6 + GT911 触摸屏完整示例
 - [ ] 内核与 U-Boot 补丁规范确定
-- [ ] 教程文档完善（工具链 → U-Boot → 内核）
+- [ ] 教程文档持续完善
 
-完整路线图见 [roadmap.md](roadmap.md)。
+完整规划见 [document/todo/todo.md](document/todo/todo.md)。
 
 ---
 
-## 🤝 贡献方式
+## 🤝 贡献指南
 
-欢迎提交 PR 与 Issue，特别注意：
+欢迎提交 PR 与 Issue！
 
-- Patch 命名规范（`[linux-imx]` / `[mainline]` 前缀）
+**补丁命名规范**：
+- `[linux-imx]` 前缀 —— NXP BSP 轨道补丁
+- `[mainline]` 前缀 —— 上游内核轨道补丁
+- `[uboot]` 前缀 —— U-Boot 补丁
+
+**文档贡献**：
+- 教程改进建议
+- 错误修复
+- 新示例代码
 
 ---
 
 ## 📄 开源协议
 
-MIT LICENSE —— 详见 [LICENSE](LICENSE)。
+MIT LICENSE —— 详见 [LICENSE](LICENSE)
 
 若补丁源自 GPL 授权的 linux-imx 或 NXP U-Boot，则保留其原始 GPL-2.0 许可证。
 
 ---
 
+## 🔗 相关链接
+
+- **快速入门**: [QUICK_START.md](QUICK_START.md)
+- **教程目录**: [document/tutorial/](document/tutorial/)
+- **问题反馈**: [GitHub Issues](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/issues)
+- **项目规划**: [document/todo/todo.md](document/todo/todo.md)
+
+---
+
 <div align="center">
 
-
 **用 🔥 和无数串口终端堆出来的工程。希望我们可以更方便地自定义自己的 i.MX6ULL 系统。**
+
+[⭐ Star](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge) · [🍴 Fork](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/fork) · [📢 Issues](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/issues)
 
 </div>
