@@ -45,7 +45,7 @@ done
 
 # Directories
 LINUX_SRC_DIR="${PROJECT_ROOT}/third_party/linux-imx"
-OUTPUT_DIR="${PROJECT_ROOT}/out/linux"
+: "${OUTPUT_DIR:=${PROJECT_ROOT}/out/linux}"
 
 # Ensure output directory exists
 mkdir -p "${OUTPUT_DIR}"
@@ -212,8 +212,64 @@ do_distclean() {
     log_info "Running distclean... Using Remove All as to make all clear!"
     # Remove and recreate output directory for clean build
     log_info "  Removing ${OUTPUT_DIR}"
-    # rm -rf "${OUTPUT_DIR}"
+    rm -rf "${OUTPUT_DIR}"
     mkdir -p "${OUTPUT_DIR}"
+}
+
+# Prepare defconfig from template
+prepare_defconfig() {
+    log_info "Preparing defconfig from template..."
+
+    # Default firmware directory
+    FIRMWARE_DIR="${FIRMWARE_DIR:-${PROJECT_ROOT}/driver/firmwares}"
+
+    # Resolve to absolute path
+    FIRMWARE_DIR=$(realpath "${FIRMWARE_DIR}")
+
+    # Template and target paths
+    TEMPLATE_FILE="${PROJECT_ROOT}/driver/device_tree/alpha-board/linux/imx_aes_defconfig.template"
+    TARGET_FILE="${LINUX_SRC_DIR}/arch/arm/configs/${DEFCONFIG}"
+
+    # Copy template and substitute variable
+    sed "s|\${FIRMWARE_DIR}|${FIRMWARE_DIR}|g" "${TEMPLATE_FILE}" > "${TARGET_FILE}"
+
+    log_info "  Template: ${TEMPLATE_FILE}"
+    log_info "  Target:   ${TARGET_FILE}"
+    log_info "  Firmware Dir: ${FIRMWARE_DIR}"
+
+    # Clone wireless-regdb repository and copy regulatory.db files
+    log_info "Preparing wireless regulatory database..."
+
+    local REGDB_REPO_URL="https://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regdb.git"
+    local REGDB_CLONE_DIR="${PROJECT_ROOT}/out/firmwares/wireless-regdb"
+    local DRIVER_FIRMWARE_DIR="${PROJECT_ROOT}/driver/firmwares"
+
+    # Ensure target directories exist
+    mkdir -p "${PROJECT_ROOT}/out/firmwares"
+    mkdir -p "${DRIVER_FIRMWARE_DIR}"
+
+    # Clone repository if not already present
+    if [ -d "${REGDB_CLONE_DIR}" ]; then
+        log_info "  wireless-regdb repository already exists, skipping clone"
+    else
+        log_info "  Cloning wireless-regdb repository..."
+        git clone "${REGDB_REPO_URL}" "${REGDB_CLONE_DIR}"
+    fi
+
+    # Copy regulatory.db files
+    if [ -f "${REGDB_CLONE_DIR}/regulatory.db" ]; then
+        cp "${REGDB_CLONE_DIR}/regulatory.db" "${DRIVER_FIRMWARE_DIR}/"
+        log_info "  Copied regulatory.db to ${DRIVER_FIRMWARE_DIR}"
+    else
+        log_warn "  regulatory.db not found in repository"
+    fi
+
+    if [ -f "${REGDB_CLONE_DIR}/regulatory.db.p7s" ]; then
+        cp "${REGDB_CLONE_DIR}/regulatory.db.p7s" "${DRIVER_FIRMWARE_DIR}/"
+        log_info "  Copied regulatory.db.p7s to ${DRIVER_FIRMWARE_DIR}"
+    else
+        log_warn "  regulatory.db.p7s not found in repository"
+    fi
 }
 
 # Configure Linux kernel
@@ -330,6 +386,7 @@ main() {
     else
         log_info "Skipping distclean (fast build mode)"
     fi
+    prepare_defconfig
     do_configure
     do_build
 

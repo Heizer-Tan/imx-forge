@@ -68,8 +68,8 @@ done
 
 # Directories
 BUSYBOX_SRC_DIR="${PROJECT_ROOT}/third_party/busybox"
-OUTPUT_DIR="${PROJECT_ROOT}/out/busybox"
-INSTALL_DIR="${PROJECT_ROOT}/rootfs/nfs"
+: "${OUTPUT_DIR:=${PROJECT_ROOT}/out/busybox}"
+: "${INSTALL_DIR:=${PROJECT_ROOT}/rootfs/nfs}"
 
 # Get number of CPU cores for parallel build
 NPROC=$(nproc)

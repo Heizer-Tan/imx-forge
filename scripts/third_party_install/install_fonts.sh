@@ -31,8 +31,8 @@ PROJECT_ROOT="${GIT_PROJECT_ROOT}"
 QT_PIPELINE_DIR="${PROJECT_ROOT}/third_party/qt-compile-pipeline"
 CONFIG_TARGET_DIR="${QT_PIPELINE_DIR}/config"
 
-# ROOTFS 目录
-ROOTFS_DIR="${PROJECT_ROOT}/rootfs/nfs"
+# ROOTFS 目录（支持外部传入）
+: "${ROOTFS_DIR:=${PROJECT_ROOT}/rootfs/nfs}"
 
 # ================================================================
 # 参数解析

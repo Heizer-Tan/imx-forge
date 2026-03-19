@@ -32,11 +32,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/logging.sh
 source "${SCRIPT_DIR}/../lib/logging.sh"
 
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+# 获取 superproject（主项目）的根目录
+GIT_PROJECT_ROOT="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"
+: "${GIT_PROJECT_ROOT:=$(git rev-parse --show-toplevel)}"
+
+# PROJECT_ROOT 支持外部传入，否则使用 git 获取的根目录
+: "${PROJECT_ROOT:=${GIT_PROJECT_ROOT}}"
+
 QT_PIPELINE_DIR="${PROJECT_ROOT}/third_party/qt-compile-pipeline"
-CONFIG_SOURCE_DIR="${SCRIPT_DIR}/config/qt"
+# CONFIG_SOURCE_DIR 支持外部传入，提供默认值
+: "${CONFIG_SOURCE_DIR:=${SCRIPT_DIR}/config/qt}"
 CONFIG_TARGET_DIR="${QT_PIPELINE_DIR}/config"
 DEFAULT_BRANCH="main"
+
+# ROOTFS 目录支持外部传入，提供默认值
+: "${ROOTFS_DIR:=${PROJECT_ROOT}/rootfs/nfs}"
 
 # ================================================================
 # 参数解析
@@ -246,273 +256,253 @@ fi
 log_info "=== 安装到 ROOTFS ==="
 echo ""
 
-# 获取 superproject（主项目）的根目录，因为脚本在子模块中运行
-GIT_PROJECT_ROOT="$(git rev-parse --show-superproject-working-tree)"
-: "${GIT_PROJECT_ROOT:=$(git rev-parse --show-toplevel)}"
-
-# ROOTFS 目录配置
-ROOTFS_DIR="${GIT_PROJECT_ROOT}/rootfs/nfs"
-
-# 重新加载配置文件以获取正确的路径（使用正确的 PROJECT_ROOT）
-export PROJECT_ROOT="${GIT_PROJECT_ROOT}"
-# shellcheck disable=SC1090
-source "${CONFIG_TARGET_DIR}/qt.conf"
-# shellcheck disable=SC1090
-source "${CONFIG_TARGET_DIR}/host.conf"
-# shellcheck disable=SC1090
-source "${CONFIG_TARGET_DIR}/target.conf"
-# shellcheck disable=SC1090
-source "${CONFIG_TARGET_DIR}/third_party.conf"
-
 # 检查 ROOTFS 是否存在
 if [[ ! -d "${ROOTFS_DIR}" ]]; then
-    log_warn "ROOTFS 目录不存在: ${ROOTFS_DIR}"
-    log_warn "跳过 ROOTFS 安装步骤"
-    log_warn ""
-    log_warn "提示: 运行以下命令创建并验证 ROOTFS:"
-    log_warn "  bash scripts/varified_rootfs_ok.sh"
-else
-    log_info "ROOTFS 目录: ${ROOTFS_DIR}"
+    log_error "ROOTFS 目录不存在: ${ROOTFS_DIR}"
+    log_error "请先创建 ROOTFS"
+    exit 1
+fi
 
-    # 创建 ROOTFS 下的必要目录
-    mkdir -p "${ROOTFS_DIR}/usr/local"
+log_info "ROOTFS 目录: ${ROOTFS_DIR}"
+
+# 创建 ROOTFS 下的必要目录
+mkdir -p "${ROOTFS_DIR}/usr/local"
+mkdir -p "${ROOTFS_DIR}/usr/lib"
+mkdir -p "${ROOTFS_DIR}/lib"
+
+# --------------------------------------
+# 第 1 步: 安装 Target Qt 到 ROOTFS (/usr)
+# --------------------------------------
+log_info ""
+log_info "----------------------------------------"
+log_info "步骤 1/2: 安装 Target Qt"
+log_info "----------------------------------------"
+log_info "源目录: ${TARGET_INSTALL_PREFIX}"
+log_info "目标目录: ${ROOTFS_DIR}/usr"
+
+# 显示将要执行的操作
+log_info ""
+log_info "将要执行的操作:"
+log_info "  lib/*       -> ${ROOTFS_DIR}/usr/lib/"
+log_info "  bin/*       -> ${ROOTFS_DIR}/usr/bin/"
+log_info "  plugins/*   -> ${ROOTFS_DIR}/usr/lib/qt6/plugins/"
+log_info "  qml/*       -> ${ROOTFS_DIR}/usr/lib/qt6/qml/"
+log_info ""
+
+# 执行拷贝
+if [[ -d "${TARGET_INSTALL_PREFIX}" ]]; then
+    # 创建目标目录
     mkdir -p "${ROOTFS_DIR}/usr/lib"
-    mkdir -p "${ROOTFS_DIR}/lib"
+    mkdir -p "${ROOTFS_DIR}/usr/bin"
+    mkdir -p "${ROOTFS_DIR}/usr/lib/qt6"
 
-    # --------------------------------------
-    # 第 1 步: 安装 Target Qt 到 ROOTFS (/usr)
-    # --------------------------------------
+    # 拷贝库文件
+    log_info "正在拷贝库文件..."
+    if [[ -d "${TARGET_INSTALL_PREFIX}/lib" ]]; then
+        cp -rf "${TARGET_INSTALL_PREFIX}/lib/"* "${ROOTFS_DIR}/usr/lib/"
+        log_info "  ✓ 库文件已拷贝"
+    fi
+
+    # 拷贝可执行文件
+    log_info "正在拷贝可执行文件..."
+    if [[ -d "${TARGET_INSTALL_PREFIX}/bin" ]]; then
+        cp -f "${TARGET_INSTALL_PREFIX}/bin/"* "${ROOTFS_DIR}/usr/bin/"
+        log_info "  ✓ 可执行文件已拷贝"
+    fi
+
+    # 拷贝插件到 /usr/lib/qt6/plugins/
+    if [[ -d "${TARGET_INSTALL_PREFIX}/plugins" ]]; then
+        log_info "正在拷贝插件..."
+        cp -rf "${TARGET_INSTALL_PREFIX}/plugins" "${ROOTFS_DIR}/usr/lib/qt6/"
+        log_info "  ✓ 插件已拷贝"
+    fi
+
+    # 拷贝 QML 模块到 /usr/lib/qt6/qml/
+    if [[ -d "${TARGET_INSTALL_PREFIX}/qml" ]]; then
+        log_info "正在拷贝 QML 模块..."
+        cp -rf "${TARGET_INSTALL_PREFIX}/qml" "${ROOTFS_DIR}/usr/lib/qt6/"
+        log_info "  ✓ QML 模块已拷贝"
+    fi
+
+    # 拷贝其他目录（如 mkspecs, architectures 等）
+    for dir in "${TARGET_INSTALL_PREFIX}"/*/; do
+        dirname="$(basename "$dir")"
+        # 跳过已处理的目录
+        if [[ "$dirname" == "lib" || "$dirname" == "bin" || "$dirname" == "plugins" || "$dirname" == "qml" ]]; then
+            continue
+        fi
+        # 拷贝其他目录到 /usr/lib/qt6/
+        if [[ -d "$dir" ]]; then
+            log_info "正在拷贝 ${dirname}..."
+            cp -rf "$dir" "${ROOTFS_DIR}/usr/lib/qt6/"
+        fi
+    done
+
+    log_info "✓ Qt 已安装到 ROOTFS /usr/"
+else
+    log_warn "Target Qt 目录不存在，跳过: ${TARGET_INSTALL_PREFIX}"
+fi
+
+# --------------------------------------
+# 第 2 步: 安装第三方库到 ROOTFS
+# --------------------------------------
+log_info ""
+log_info "----------------------------------------"
+log_info "步骤 2/3: 安装第三方库"
+log_info "----------------------------------------"
+log_info "源目录: ${THIRD_PARTY_SYSROOT}"
+log_info "目标目录: ${ROOTFS_DIR}"
+
+# 检查第三方库 sysroot 是否存在
+if [[ ! -d "${THIRD_PARTY_SYSROOT}" ]]; then
+    log_warn "第三方库 sysroot 不存在: ${THIRD_PARTY_SYSROOT}"
+    log_warn "跳过第三方库安装"
+else
+    # 查找并显示将要拷贝的库
     log_info ""
-    log_info "----------------------------------------"
-    log_info "步骤 1/2: 安装 Target Qt"
-    log_info "----------------------------------------"
-    log_info "源目录: ${TARGET_INSTALL_PREFIX}"
-    log_info "目标目录: ${ROOTFS_DIR}/usr"
+    log_info "找到的第三方库文件:"
 
-    # 显示将要执行的操作
+    # 收集需要拷贝的文件
+    declare -a LIB_FILES=()
+    declare -a BIN_FILES=()
+
+    # 查找 .so 文件（库文件），最多显示 20 个
+    lib_count=0
+    max_libs=20
+    while IFS= read -r -d '' file; do
+        LIB_FILES+=("$file")
+        ((lib_count++)) || true
+        [[ $lib_count -ge $max_libs ]] && break
+    done < <(find "${THIRD_PARTY_SYSROOT}" \( -type f -o -type l \) \( -name "*.so*" -o -name "*.a" \) -print0 2>/dev/null)
+
+    # 查找可执行文件（排除 downloads 和 build 目录），最多显示 10 个
+    bin_count=0
+    max_bins=10
+    while IFS= read -r -d '' file; do
+        BIN_FILES+=("$file")
+        ((bin_count++)) || true
+        [[ $bin_count -ge $max_bins ]] && break
+    done < <(find "${THIRD_PARTY_SYSROOT}" -type f -executable -not -path "*/downloads/*" -not -path "*/build/*" -not -name "*.so*" -print0 2>/dev/null)
+
+    # 显示文件列表（最多显示前 20 个）
+    if [[ ${#LIB_FILES[@]} -gt 0 ]]; then
+        log_info "  库文件 (*.so, *.a):"
+        for file in "${LIB_FILES[@]}"; do
+            rel_path="${file#${THIRD_PARTY_SYSROOT}/}"
+            log_info "    - ${rel_path}"
+        done
+        if [[ ${#LIB_FILES[@]} -ge 20 ]]; then
+            log_info "    ... (还有更多)"
+        fi
+    fi
+
+    if [[ ${#BIN_FILES[@]} -gt 0 ]]; then
+        log_info "  可执行文件:"
+        for file in "${BIN_FILES[@]}"; do
+            rel_path="${file#${THIRD_PARTY_SYSROOT}/}"
+            log_info "    - ${rel_path}"
+        done
+        if [[ ${#BIN_FILES[@]} -ge 10 ]]; then
+            log_info "    ... (还有更多)"
+        fi
+    fi
+
     log_info ""
     log_info "将要执行的操作:"
-    log_info "  lib/*       -> ${ROOTFS_DIR}/usr/lib/"
-    log_info "  bin/*       -> ${ROOTFS_DIR}/usr/bin/"
-    log_info "  plugins/*   -> ${ROOTFS_DIR}/usr/lib/qt6/plugins/"
-    log_info "  qml/*       -> ${ROOTFS_DIR}/usr/lib/qt6/qml/"
+    log_info "  1. 拷贝库文件 (*.so, *.a) -> ${ROOTFS_DIR}/usr/lib/"
+    log_info "  2. 拷贝可执行文件 -> ${ROOTFS_DIR}/usr/bin/"
     log_info ""
 
-    # 执行拷贝
-    if [[ -d "${TARGET_INSTALL_PREFIX}" ]]; then
-        # 创建目标目录
-        mkdir -p "${ROOTFS_DIR}/usr/lib"
-        mkdir -p "${ROOTFS_DIR}/usr/bin"
-        mkdir -p "${ROOTFS_DIR}/usr/lib/qt6"
-
-        # 拷贝库文件
-        log_info "正在拷贝库文件..."
-        if [[ -d "${TARGET_INSTALL_PREFIX}/lib" ]]; then
-            cp -rf "${TARGET_INSTALL_PREFIX}/lib/"* "${ROOTFS_DIR}/usr/lib/"
-            log_info "  ✓ 库文件已拷贝"
-        fi
-
-        # 拷贝可执行文件
-        log_info "正在拷贝可执行文件..."
-        if [[ -d "${TARGET_INSTALL_PREFIX}/bin" ]]; then
-            cp -f "${TARGET_INSTALL_PREFIX}/bin/"* "${ROOTFS_DIR}/usr/bin/"
-            log_info "  ✓ 可执行文件已拷贝"
-        fi
-
-        # 拷贝插件到 /usr/lib/qt6/plugins/
-        if [[ -d "${TARGET_INSTALL_PREFIX}/plugins" ]]; then
-            log_info "正在拷贝插件..."
-            cp -rf "${TARGET_INSTALL_PREFIX}/plugins" "${ROOTFS_DIR}/usr/lib/qt6/"
-            log_info "  ✓ 插件已拷贝"
-        fi
-
-        # 拷贝 QML 模块到 /usr/lib/qt6/qml/
-        if [[ -d "${TARGET_INSTALL_PREFIX}/qml" ]]; then
-            log_info "正在拷贝 QML 模块..."
-            cp -rf "${TARGET_INSTALL_PREFIX}/qml" "${ROOTFS_DIR}/usr/lib/qt6/"
-            log_info "  ✓ QML 模块已拷贝"
-        fi
-
-        # 拷贝其他目录（如 mkspecs, architectures 等）
-        for dir in "${TARGET_INSTALL_PREFIX}"/*/; do
-            dirname="$(basename "$dir")"
-            # 跳过已处理的目录
-            if [[ "$dirname" == "lib" || "$dirname" == "bin" || "$dirname" == "plugins" || "$dirname" == "qml" ]]; then
-                continue
-            fi
-            # 拷贝其他目录到 /usr/lib/qt6/
-            if [[ -d "$dir" ]]; then
-                log_info "正在拷贝 ${dirname}..."
-                cp -rf "$dir" "${ROOTFS_DIR}/usr/lib/qt6/"
-            fi
-        done
-
-        log_info "✓ Qt 已安装到 ROOTFS /usr/"
+    # 拷贝库文件
+    log_info "正在拷贝库文件..."
+    mkdir -p "${ROOTFS_DIR}/usr/lib"
+    if find "${THIRD_PARTY_SYSROOT}" \( -type f -o -type l \) \( -name "*.so*" -o -name "*.a" \) -print0 2>/dev/null | \
+       xargs -0 -I {} cp -d {} "${ROOTFS_DIR}/usr/lib/" 2>/dev/null; then
+        log_info "✓ 已拷贝库文件到 ${ROOTFS_DIR}/usr/lib/"
     else
-        log_warn "Target Qt 目录不存在，跳过: ${TARGET_INSTALL_PREFIX}"
+        log_warn "库文件拷贝失败或没有找到库文件"
     fi
 
-    # --------------------------------------
-    # 第 2 步: 安装第三方库到 ROOTFS
-    # --------------------------------------
-    log_info ""
-    log_info "----------------------------------------"
-    log_info "步骤 2/3: 安装第三方库"
-    log_info "----------------------------------------"
-    log_info "源目录: ${THIRD_PARTY_SYSROOT}"
-    log_info "目标目录: ${ROOTFS_DIR}"
+    # 拷贝可执行文件
+    log_info "正在拷贝可执行文件..."
+    mkdir -p "${ROOTFS_DIR}/usr/bin"
+    BIN_COUNT=0
+    while IFS= read -r -d '' file; do
+        basename="$(basename "$file")"
+        if cp -f "$file" "${ROOTFS_DIR}/usr/bin/${basename}" 2>/dev/null; then
+            ((BIN_COUNT++)) || true
+        fi
+    done < <(find "${THIRD_PARTY_SYSROOT}" -type f -executable -not -path "*/downloads/*" -not -path "*/build/*" -not -name "*.so*" -print0 2>/dev/null)
 
-    # 检查第三方库 sysroot 是否存在
-    if [[ ! -d "${THIRD_PARTY_SYSROOT}" ]]; then
-        log_warn "第三方库 sysroot 不存在: ${THIRD_PARTY_SYSROOT}"
-        log_warn "跳过第三方库安装"
+    if [[ $BIN_COUNT -gt 0 ]]; then
+        log_info "✓ 已拷贝 ${BIN_COUNT} 个可执行文件到 ${ROOTFS_DIR}/usr/bin/"
     else
-        # 查找并显示将要拷贝的库
-        log_info ""
-        log_info "找到的第三方库文件:"
-
-        # 收集需要拷贝的文件
-        declare -a LIB_FILES=()
-        declare -a BIN_FILES=()
-
-        # 查找 .so 文件（库文件），最多显示 20 个
-        lib_count=0
-        max_libs=20
-        while IFS= read -r -d '' file; do
-            LIB_FILES+=("$file")
-            ((lib_count++)) || true
-            [[ $lib_count -ge $max_libs ]] && break
-        done < <(find "${THIRD_PARTY_SYSROOT}" \( -type f -o -type l \) \( -name "*.so*" -o -name "*.a" \) -print0 2>/dev/null)
-
-        # 查找可执行文件（排除 downloads 和 build 目录），最多显示 10 个
-        bin_count=0
-        max_bins=10
-        while IFS= read -r -d '' file; do
-            BIN_FILES+=("$file")
-            ((bin_count++)) || true
-            [[ $bin_count -ge $max_bins ]] && break
-        done < <(find "${THIRD_PARTY_SYSROOT}" -type f -executable -not -path "*/downloads/*" -not -path "*/build/*" -not -name "*.so*" -print0 2>/dev/null)
-
-        # 显示文件列表（最多显示前 20 个）
-        if [[ ${#LIB_FILES[@]} -gt 0 ]]; then
-            log_info "  库文件 (*.so, *.a):"
-            for file in "${LIB_FILES[@]}"; do
-                rel_path="${file#${THIRD_PARTY_SYSROOT}/}"
-                log_info "    - ${rel_path}"
-            done
-            if [[ ${#LIB_FILES[@]} -ge 20 ]]; then
-                log_info "    ... (还有更多)"
-            fi
-        fi
-
-        if [[ ${#BIN_FILES[@]} -gt 0 ]]; then
-            log_info "  可执行文件:"
-            for file in "${BIN_FILES[@]}"; do
-                rel_path="${file#${THIRD_PARTY_SYSROOT}/}"
-                log_info "    - ${rel_path}"
-            done
-            if [[ ${#BIN_FILES[@]} -ge 10 ]]; then
-                log_info "    ... (还有更多)"
-            fi
-        fi
-
-        log_info ""
-        log_info "将要执行的操作:"
-        log_info "  1. 拷贝库文件 (*.so, *.a) -> ${ROOTFS_DIR}/usr/lib/"
-        log_info "  2. 拷贝可执行文件 -> ${ROOTFS_DIR}/usr/bin/"
-        log_info ""
-
-        # 拷贝库文件
-        log_info "正在拷贝库文件..."
-        mkdir -p "${ROOTFS_DIR}/usr/lib"
-        if find "${THIRD_PARTY_SYSROOT}" \( -type f -o -type l \) \( -name "*.so*" -o -name "*.a" \) -print0 2>/dev/null | \
-           xargs -0 -I {} cp -d {} "${ROOTFS_DIR}/usr/lib/" 2>/dev/null; then
-            log_info "✓ 已拷贝库文件到 ${ROOTFS_DIR}/usr/lib/"
-        else
-            log_warn "库文件拷贝失败或没有找到库文件"
-        fi
-
-        # 拷贝可执行文件
-        log_info "正在拷贝可执行文件..."
-        mkdir -p "${ROOTFS_DIR}/usr/bin"
-        BIN_COUNT=0
-        while IFS= read -r -d '' file; do
-            basename="$(basename "$file")"
-            if cp -f "$file" "${ROOTFS_DIR}/usr/bin/${basename}" 2>/dev/null; then
-                ((BIN_COUNT++)) || true
-            fi
-        done < <(find "${THIRD_PARTY_SYSROOT}" -type f -executable -not -path "*/downloads/*" -not -path "*/build/*" -not -name "*.so*" -print0 2>/dev/null)
-
-        if [[ $BIN_COUNT -gt 0 ]]; then
-            log_info "✓ 已拷贝 ${BIN_COUNT} 个可执行文件到 ${ROOTFS_DIR}/usr/bin/"
-        else
-            log_warn "没有找到可执行文件或拷贝失败"
-        fi
+        log_warn "没有找到可执行文件或拷贝失败"
     fi
-
-    # --------------------------------------
-    # 第 3 步: 安装字体到 ROOTFS
-    # --------------------------------------
-    if [[ "${SKIP_FONTS}" == false ]]; then
-        log_info ""
-        log_info "----------------------------------------"
-        log_info "步骤 3/3: 安装字体"
-        log_info "----------------------------------------"
-
-        # 加载字体配置
-        # shellcheck disable=SC1090
-        if [[ -f "${SCRIPT_DIR}/config/qt/fonts.conf" ]]; then
-            source "${SCRIPT_DIR}/config/qt/fonts.conf"
-
-            if [[ "${FONTS_ENABLED}" == "true" ]]; then
-                log_info ""
-                log_info "将要安装的字体:"
-                log_info "  - DejaVu Fonts (拉丁字符 + 等宽字体)"
-                log_info "  - Noto Sans CJK (中日韩字符)"
-                log_info "  - Noto Color Emoji (Emoji 支持)"
-                log_info ""
-                log_info "提示: 字体安装脚本会检测已存在的字体并跳过"
-                log_info ""
-
-                # 调用字体安装脚本
-                if bash "${SCRIPT_DIR}/install_fonts.sh"; then
-                    log_info "✓ 字体已安装到 ROOTFS"
-                else
-                    log_warn "字体安装失败或跳过"
-                fi
-            else
-                log_info "字体安装已禁用 (FONTS_ENABLED=false)"
-            fi
-        else
-            log_warn "字体配置文件不存在，跳过字体安装"
-        fi
-    else
-        log_info ""
-        log_info "----------------------------------------"
-        log_info "步骤 3/3: 安装字体"
-        log_info "----------------------------------------"
-        log_info "已跳过 (--no-fonts)"
-    fi
-
-    # --------------------------------------
-    # 安装完成摘要
-    # --------------------------------------
-    log_info ""
-    log_info "=== ROOTFS 安装完成 ==="
-    log_info ""
-    log_info "安装内容:"
-    log_info "  Qt 库:      ${ROOTFS_DIR}/usr/lib/"
-    log_info "  Qt 可执行:  ${ROOTFS_DIR}/usr/bin/"
-    log_info "  Qt 插件:    ${ROOTFS_DIR}/usr/lib/qt6/plugins/"
-    log_info "  Qt QML:     ${ROOTFS_DIR}/usr/lib/qt6/qml/"
-    log_info "  第三方库:   ${ROOTFS_DIR}/usr/lib/"
-    log_info "  字体:       ${ROOTFS_DIR}/usr/share/fonts/"
-    log_info ""
-    log_info "Qt 字体环境变量:"
-    log_info "  export QT_QPA_FONTDIR=/usr/share/fonts"
-    log_info "  export LANG=C.UTF-8"
-    log_info ""
 fi
+
+# --------------------------------------
+# 第 3 步: 安装字体到 ROOTFS
+# --------------------------------------
+if [[ "${SKIP_FONTS}" == false ]]; then
+    log_info ""
+    log_info "----------------------------------------"
+    log_info "步骤 3/3: 安装字体"
+    log_info "----------------------------------------"
+
+    # 加载字体配置
+    # shellcheck disable=SC1090
+    if [[ -f "${SCRIPT_DIR}/config/qt/fonts.conf" ]]; then
+        source "${SCRIPT_DIR}/config/qt/fonts.conf"
+
+        if [[ "${FONTS_ENABLED}" == "true" ]]; then
+            log_info ""
+            log_info "将要安装的字体:"
+            log_info "  - DejaVu Fonts (拉丁字符 + 等宽字体)"
+            log_info "  - Noto Sans CJK (中日韩字符)"
+            log_info "  - Noto Color Emoji (Emoji 支持)"
+            log_info ""
+            log_info "提示: 字体安装脚本会检测已存在的字体并跳过"
+            log_info ""
+
+            # 调用字体安装脚本
+            if bash "${SCRIPT_DIR}/install_fonts.sh"; then
+                log_info "✓ 字体已安装到 ROOTFS"
+            else
+                log_warn "字体安装失败或跳过"
+            fi
+        else
+            log_info "字体安装已禁用 (FONTS_ENABLED=false)"
+        fi
+    else
+        log_warn "字体配置文件不存在，跳过字体安装"
+    fi
+else
+    log_info ""
+    log_info "----------------------------------------"
+    log_info "步骤 3/3: 安装字体"
+    log_info "----------------------------------------"
+    log_info "已跳过 (--no-fonts)"
+fi
+
+# --------------------------------------
+# 安装完成摘要
+# --------------------------------------
+log_info ""
+log_info "=== ROOTFS 安装完成 ==="
+log_info ""
+log_info "安装内容:"
+log_info "  Qt 库:      ${ROOTFS_DIR}/usr/lib/"
+log_info "  Qt 可执行:  ${ROOTFS_DIR}/usr/bin/"
+log_info "  Qt 插件:    ${ROOTFS_DIR}/usr/lib/qt6/plugins/"
+log_info "  Qt QML:     ${ROOTFS_DIR}/usr/lib/qt6/qml/"
+log_info "  第三方库:   ${ROOTFS_DIR}/usr/lib/"
+log_info "  字体:       ${ROOTFS_DIR}/usr/share/fonts/"
+log_info ""
+log_info "Qt 字体环境变量:"
+log_info "  export QT_QPA_FONTDIR=/usr/share/fonts"
+log_info "  export LANG=C.UTF-8"
+log_info ""
 
 # ================================================================
 # 完成

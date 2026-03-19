@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Release Build Script for U-Boot
+# Release Build Script for Linux
 #
 # This script ensures a reproducible release build by:
 # 1. Cleaning and resetting all submodules
@@ -8,7 +8,7 @@
 # 3. Applying patches
 # 4. Delegating to the main build script
 #
-# Usage: ./build_release_uboot.sh [release_version]
+# Usage: ./build_release_linux.sh [release_version]
 #
 
 set -e
@@ -29,10 +29,10 @@ log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 BUILD_HELPER_DIR="${PROJECT_ROOT}/scripts/build_helper"
-UBOOT_DIR="${PROJECT_ROOT}/third_party/uboot-imx"
-PATCH_DIR="${PROJECT_ROOT}/patches/uboot-imx"
-PATCH="${PATCH_DIR}/charlies_board.patch"
-BUILD_INFO_FILE="${PROJECT_ROOT}/out/uboot/build_info.txt"
+LINUX_DIR="${PROJECT_ROOT}/third_party/linux-imx"
+PATCH_DIR="${PROJECT_ROOT}/patches/linux-imx"
+PATCH="${PATCH_DIR}/linux-imx-latest.patch"
+BUILD_INFO_FILE="${PROJECT_ROOT}/out/linux/build_info.txt"
 
 # For reproducible builds - use fixed timestamp
 # Update SOURCE_DATE_EPOCH for each release
@@ -40,17 +40,17 @@ export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-1609459200}  # 2021-01-01 00:00:00
 export LC_ALL=C
 
 # ============================================
-# Step 1: Reset U-Boot Submodule to Default Branch
+# Step 1: Reset Linux Submodule to Default Branch
 # ============================================
-log_step "1/5: Resetting U-Boot Submodule"
+log_step "1/5: Resetting Linux Submodule"
 
-cd "$UBOOT_DIR"
+cd "$LINUX_DIR"
 
 # Detect default branch
 log_info "Detecting default branch..."
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
-# Fallback to lf_v2025.04 if detection fails
-: "${DEFAULT_BRANCH:=lf_v2025.04}"
+# Fallback to lf-6.12.y if detection fails
+: "${DEFAULT_BRANCH:=lf-6.12.y}"
 log_info "Default branch: ${DEFAULT_BRANCH}"
 
 # Fetch upstream to ensure we have latest state
@@ -74,7 +74,7 @@ git reset --hard "origin/${DEFAULT_BRANCH}"
 # Clean again to ensure pristine state
 git clean -ffdx
 
-log_info "U-Boot submodule reset complete"
+log_info "Linux submodule reset complete"
 
 # ============================================
 # Step 2: Verify Submodule State
@@ -82,13 +82,13 @@ log_info "U-Boot submodule reset complete"
 log_step "2/5: Verifying Submodule State"
 
 # Show current commit for reproducibility
-UBOOT_COMMIT=$(git rev-parse HEAD)
-UBOOT_DESCRIBE=$(git describe --tags --always 2>/dev/null || echo "no-tags")
-UBOOT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+LINUX_COMMIT=$(git rev-parse HEAD)
+LINUX_DESCRIBE=$(git describe --tags --always 2>/dev/null || echo "no-tags")
+LINUX_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-log_info "U-Boot commit: ${UBOOT_COMMIT}"
-log_info "U-Boot version: ${UBOOT_DESCRIBE}"
-log_info "U-Boot branch: ${UBOOT_BRANCH}"
+log_info "Linux commit: ${LINUX_COMMIT}"
+log_info "Linux version: ${LINUX_DESCRIBE}"
+log_info "Linux branch: ${LINUX_BRANCH}"
 
 # ============================================
 # Step 3: Create Release Branch
@@ -114,38 +114,42 @@ log_info "Release branch created"
 # ============================================
 log_step "4/5: Applying Patch"
 
+PATCHED_FILES=0
 if [ ! -f "$PATCH" ]; then
-    log_error "Patch file not found: $PATCH"
-    exit 1
-fi
-
-log_info "Applying patch: $(basename $PATCH)"
-if git apply --check "$PATCH" 2>/dev/null; then
-    git apply "$PATCH"
-    log_info "Patch applied successfully"
+    log_warn "Patch file not found: $PATCH"
+    log_warn "Continuing build without patch..."
+    PATCHED_FILES=0
+    PATCH_NAME="None"
 else
-    log_warn "Patch check failed. Trying with --3way..."
-    if git apply --3way "$PATCH"; then
-        log_info "Patch applied with --3way"
+    log_info "Applying patch: $(basename $PATCH)"
+    if git apply --check "$PATCH" 2>/dev/null; then
+        git apply "$PATCH"
+        log_info "Patch applied successfully"
     else
-        log_error "Failed to apply patch"
-        exit 1
+        log_warn "Patch check failed. Trying with --3way..."
+        if git apply --3way "$PATCH"; then
+            log_info "Patch applied with --3way"
+        else
+            log_error "Failed to apply patch"
+            exit 1
+        fi
     fi
+
+    # Show patch summary
+    PATCHED_FILES=$(git diff --name-only HEAD 2>/dev/null | wc -l)
+    PATCH_NAME=$(basename $PATCH)
+    log_info "Modified files: ${PATCHED_FILES}"
 fi
 
-# Show patch summary
-PATCHED_FILES=$(git diff --name-only HEAD 2>/dev/null | wc -l)
-log_info "Modified files: ${PATCHED_FILES}"
-
 # ============================================
-# Step 5: Build (delegate to build-uboot.sh)
+# Step 5: Build (delegate to build-linux.sh)
 # ============================================
-log_step "5/5: Building U-Boot"
+log_step "5/5: Building Linux"
 
 cd "$PROJECT_ROOT"
 
-log_info "Calling build-uboot.sh..."
-"${BUILD_HELPER_DIR}/build-uboot.sh"
+log_info "Calling build-linux.sh..."
+"${BUILD_HELPER_DIR}/build-linux.sh"
 
 # ============================================
 # Generate Build Info
@@ -156,21 +160,21 @@ mkdir -p "$(dirname "$BUILD_INFO_FILE")"
 
 cat > "$BUILD_INFO_FILE" << BUILDINFO
 ========================================
-U-Boot Release Build Information
+Linux Release Build Information
 ========================================
 Release Version: ${1:-unknown}
 Build Date: $(date -u -d @$SOURCE_DATE_EPOCH 2>/dev/null || date -u)
 Source Date Epoch: ${SOURCE_DATE_EPOCH}
 
-U-Boot Information:
+Linux Information:
 -------------------
-Commit: ${UBOOT_COMMIT}
-Version: ${UBOOT_DESCRIBE}
-Branch: ${UBOOT_BRANCH}
+Commit: ${LINUX_COMMIT}
+Version: ${LINUX_DESCRIBE}
+Branch: ${LINUX_BRANCH}
 
 Patch Information:
 ------------------
-Patch: $(basename $PATCH)
+Patch: ${PATCH_NAME}
 Files Modified: ${PATCHED_FILES}
 
 Build Environment:
@@ -193,9 +197,9 @@ log_info "Release Build Complete!"
 log_info "========================================"
 log_info ""
 log_info "Build artifacts:"
-log_info "  - ${PROJECT_ROOT}/out/uboot/u-boot-dtb.imx"
-log_info "  - ${PROJECT_ROOT}/out/uboot/u-boot-dtb.bin"
-log_info "  - ${PROJECT_ROOT}/out/uboot/u-boot.dtb"
+log_info "  - ${PROJECT_ROOT}/out/linux/arch/arm/boot/zImage"
+log_info "  - ${PROJECT_ROOT}/out/linux/vmlinux"
+log_info "  - ${PROJECT_ROOT}/out/linux/System.map"
 log_info ""
 log_info "Build info:"
 log_info "  - ${BUILD_INFO_FILE}"

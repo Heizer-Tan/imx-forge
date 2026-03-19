@@ -35,7 +35,7 @@ DEFAULT_DEVICE_TREE="imx6ull-14x14-evk-emmc"
 
 # Directories
 UBOOT_SRC_DIR="${PROJECT_ROOT}/third_party/uboot-imx"
-OUTPUT_DIR="${PROJECT_ROOT}/out/uboot"
+: "${OUTPUT_DIR:=${PROJECT_ROOT}/out/uboot}"
 
 # Ensure output directory exists
 mkdir -p "${OUTPUT_DIR}"
