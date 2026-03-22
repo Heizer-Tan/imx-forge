@@ -66,14 +66,20 @@ if [[ -z "$SUBMODULE_PATH" ]]; then
     usage
 fi
 
-# Normalize submodule name (convert underscores to hyphens)
-SUBMODULE_NAME="${SUBMODULE_PATH//_/-}"
-
 # Remove 'third_party/' prefix if present
-SUBMODULE_NAME="${SUBMODULE_NAME#third_party/}"
+SUBMODULE_NAME="${SUBMODULE_PATH#third_party/}"
 
-# Construct full path
+# Construct full path - try with original name first
 SUBMODULE_FULL_PATH="$REPO_BASE_DIR/third_party/$SUBMODULE_NAME"
+
+# If not found, try converting underscores to hyphens for compatibility
+if [[ ! -d "$SUBMODULE_FULL_PATH" ]]; then
+    SUBMODULE_NAME_HYPHEN="${SUBMODULE_NAME//_/-}"
+    SUBMODULE_FULL_PATH="$REPO_BASE_DIR/third_party/$SUBMODULE_NAME_HYPHEN"
+    if [[ -d "$SUBMODULE_FULL_PATH" ]]; then
+        SUBMODULE_NAME="$SUBMODULE_NAME_HYPHEN"
+    fi
+fi
 
 # Verify submodule exists
 if [[ ! -d "$SUBMODULE_FULL_PATH" ]]; then
@@ -135,9 +141,10 @@ fi
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
 
-# Generate patch filename
+# Generate patch filename (sanitize branch name - replace / with -)
 DATE=$(date +%Y%m%d)
-PATCH_FILENAME="${SUBMODULE_NAME}-${CURRENT_BRANCH}-${DATE}.patch"
+BRANCH_SANITIZED="${CURRENT_BRANCH//\//-}"
+PATCH_FILENAME="${SUBMODULE_NAME}-${BRANCH_SANITIZED}-${DATE}.patch"
 PATCH_FULL_PATH="$OUTPUT_DIR/$PATCH_FILENAME"
 
 # Count commits

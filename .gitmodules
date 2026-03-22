@@ -11,3 +11,7 @@
 [submodule "third_party/uboot-imx"]
 	path = third_party/uboot-imx
 	url = https://github.com/nxp-imx/uboot-imx.git
+[submodule "third_party/linux_mainline"]
+	path = third_party/linux_mainline
+	url = https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+	branch = master
