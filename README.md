@@ -13,7 +13,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](LICENSE)
 [![WSL2](https://img.shields.io/badge/WSL2-Tested%20%26%20OK-brightgreen?style=flat-square)](#-wsl2-深度友好)
-[![Kernel](https://img.shields.io/badge/Kernel-dual%20track%20(6.12.3%20%2B%20mainline)-blue?style=flat-square)](#-双轨内核策略)
+[![Kernel](https://img.shields.io/badge/Kernel-dual%20track%20(6.12.3%20%2B%20mainline%207.0rc)-blue?style=flat-square)](#-双轨内核策略)
 [![Mainline](https://img.shields.io/badge/Mainline-migrated%20%EF%83%A0-brightgreen?style=flat-square)](#-双轨内核策略)
 [![Bootloader](https://img.shields.io/badge/Bootloader-uboot--imx%202025--04-yellow?style=flat-square)](#-双轨内核策略)
 [![Board](https://img.shields.io/badge/Board-alpha%20%E2%9C%85-blueviolet?style=flat-square)](#-支持的开发板)
