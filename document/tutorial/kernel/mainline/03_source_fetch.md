@@ -12,17 +12,13 @@
 
 ```bash
 # 创建工作目录
-mkdir -p ~/linux-kernel
-cd ~/linux-kernel
-
-# 克隆主线内核（只克隆最新版本，节省时间）
-git clone --depth=1 --branch v7.0-rc4 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git linux-mainline
+git clone --depth=1 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux-mainline
 ```
 
 如果你想要完整的历史记录（可以切换到任意版本），去掉 `--depth=1`：
 
 ```bash
-git clone --branch v7.0-rc4 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git linux-mainline
+git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux-mainline
 ```
 
 这会花比较长的时间，但你可以自由切换到任意版本。
@@ -36,7 +32,7 @@ cd linux-mainline
 git describe
 ```
 
-你应该看到类似 `v7.0-rc4` 的输出。如果输出不对，检查一下分支是否正确。
+我这跟的是Master分支，此时此刻，你应该看到类似 `v7.0-rc4` 的输出。之后可能就不是了，7.0到底是candidate版本，没发呢还！
 
 ## 第二步——理解内核目录结构
 
