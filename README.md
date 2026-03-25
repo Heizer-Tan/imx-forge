@@ -71,7 +71,14 @@ patches/
 ```
 IMX-Forge/
 ├── scripts/          # 一键构建脚本
-├── third_party/      # U-Boot / Linux / BusyBox 子模块
+│   ├── release-all.sh      # 全量构建
+│   └── build_helper/       # 分组件构建
+├── third_party/      # 5 个子模块
+│   ├── uboot-imx          # U-Boot NXP fork
+│   ├── linux-imx          # NXP BSP 6.12.3
+│   ├── linux_mainline     # 上游主线内核
+│   ├── busybox            # BusyBox
+│   └── qt-compile-pipeline # QT 交叉编译
 ├── patches/          # 双轨补丁管理
 ├── driver/           # 设备树和驱动示例
 ├── examples/         # 项目示例（QT/驱动/系统）
@@ -99,10 +106,11 @@ sudo mv arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-linux-gnueabihf /opt/arm-gnu
 export PATH=/opt/arm-gnu-toolchain/bin:$PATH
 
 # 4. 一键构建（推荐）或分步构建
-./scripts/release-all.sh              # 一键构建所有组件
+./scripts/release-all.sh                      # 一键构建所有组件（NXP BSP 内核）
 # 或分步构建：
 # ./scripts/build_helper/build-uboot.sh
-# ./scripts/build_helper/build-linux.sh
+# ./scripts/build_helper/build-linux.sh       # NXP BSP 内核
+# ./scripts/build_helper/build-mainline-linux.sh  # 主线内核
 # ./scripts/build_helper/build-busybox.sh
 
 # 5. 烧录到 SD 卡，启动！
@@ -173,36 +181,46 @@ export PATH=/opt/arm-gnu-toolchain/bin:$PATH
 ```
 imx-forge/
 ├── scripts/                # 构建脚本
-│   ├── build_helper/      # U-Boot / Linux / BusyBox 构建脚本
-│   ├── patch_maker.sh     # 补丁生成工具
+│   ├── build_helper/      # 组件构建脚本
+│   │   ├── build-uboot.sh
+│   │   ├── build-linux.sh         # NXP BSP 内核
+│   │   ├── build-mainline-linux.sh  # 主线内核
+│   │   └── build-busybox.sh
+│   ├── release-all.sh      # 一键构建所有组件
+│   ├── patch_maker.sh      # 补丁生成工具
 │   └── ...
-├── third_party/           # 第三方源码（Git Submodule）
-│   ├── uboot-imx/        # U-Boot NXP fork
-│   ├── linux-imx/        # Linux Kernel NXP BSP
-│   ├── busybox/          # BusyBox
+├── third_party/            # 第三方源码（Git Submodule）
+│   ├── uboot-imx/          # U-Boot NXP fork
+│   ├── linux-imx/          # Linux Kernel NXP BSP
+│   ├── linux_mainline/     # Linux Kernel 上游主线
+│   ├── busybox/            # BusyBox
 │   └── qt-compile-pipeline/  # QT 交叉编译流水线
-├── patches/              # 补丁文件（format-patch + series）
-│   ├── linux-imx/        # [linux-imx] 标签
-│   ├── linux-mainline/   # [mainline] 标签
-│   └── uboot/            # U-Boot 补丁
-├── driver/               # 设备树和驱动
-│   ├── device_tree/      # 设备树文件
-│   ├── led/              # LED 驱动示例
-│   └── base_driver/      # 基础驱动框架
-├── examples/             # 示例工程
-│   ├── qt/               # QT 应用示例
-│   ├── driver/           # 驱动示例
-│   ├── system/           # 系统示例
-│   └── project/          # 完整项目示例
-├── rootfs/               # 根文件系统
-│   └── nfs/              # NFS 挂载用 rootfs
-├── document/             # 完整教程文档
-│   ├── tutorial/         # 教程（工具链/U-Boot/内核/Rootfs）
-│   ├── practical/        # 实战教程
-│   └── todo/             # 项目规划
-├── out/                  # 编译输出目录
-├── develop/              # 开发工具
-└── tools/                # 辅助工具
+├── patches/                # 补丁文件（format-patch + series）
+│   ├── linux-imx/          # [linux-imx] 标签
+│   ├── linux-mainline/     # [mainline] 标签
+│   └── uboot/              # U-Boot 补丁
+├── driver/                 # 设备树和驱动
+│   ├── device_tree/        # 设备树文件
+│   │   └── alpha-board/    # 正点原子阿尔法板
+│   ├── led/                # LED 驱动示例
+│   ├── base_driver/        # 基础驱动框架
+│   └── firmwares/          # 固件
+├── examples/               # 示例工程
+│   ├── qt/                 # QT 应用示例
+│   ├── driver/             # 驱动示例
+│   ├── system/             # 系统示例
+│   └── project/            # 完整项目示例
+├── rootfs/                 # 根文件系统
+│   ├── nfs/                # NFS 挂载用 rootfs
+│   ├── overlay/            # Overlay 叠加目录
+│   └── src/                # Rootfs 源文件
+├── document/               # 完整教程文档
+│   ├── tutorial/           # 教程（工具链/U-Boot/内核/Rootfs）
+│   ├── practical/          # 实战教程
+│   └── todo/               # 项目规划
+├── out/                    # 编译输出目录
+├── develop/                # 开发工具
+└── tools/                  # 辅助工具
 ```
 
 ---
@@ -215,7 +233,7 @@ imx-forge/
 - [ ] 自制板 v1 支持
 - [ ] 教程文档持续完善
 
-完整规划见 [document/todo/todo.md](document/todo/todo.md)，项目状态见 [STATUS.md](STATUS.md)。
+完整规划见 [document/todo/todo.md](document/todo/todo.md)。
 
 ---
 
@@ -246,8 +264,6 @@ MIT LICENSE —— 详见 [LICENSE](LICENSE)
 ## 🔗 相关链接
 
 - **快速入门**: [QUICK_START.md](QUICK_START.md)
-- **项目状态**: [STATUS.md](STATUS.md)
-- **变更日志**: [CHANGELOG.md](CHANGELOG.md)
 - **教程目录**: [document/tutorial/](document/tutorial/)
 - **问题反馈**: [GitHub Issues](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/issues)
 - **项目规划**: [document/todo/todo.md](document/todo/todo.md)

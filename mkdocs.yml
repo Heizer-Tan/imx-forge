@@ -1,6 +1,7 @@
 site_name: IMX-Forge的教程文档  # 网站标题,显示在浏览器标签和页面顶部
 site_description: IMX-Forge，专注于IMX6ULL的教程文档网站  # 网站描述,用于SEO优化
 site_author: Charliechen114514  # 作者名称,可以改成你的真实姓名或网名
+site_url: https://awesome-embedded-learning-studio.github.io/imx-forge/
 
 # 版权信息,显示在页面底部
 copyright: Copyright &copy; 2026 Charliechen - 保留所有权利
