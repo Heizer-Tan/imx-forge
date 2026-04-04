@@ -113,6 +113,18 @@ check_directory_safe() {
     local abs_dir
     abs_dir="$(cd "$dir" 2>/dev/null && pwd)" || {
         log_error "Cannot access directory: $dir"
+        log_error ""
+        log_error "This script requires a complete rootfs directory to merge overlay files."
+        log_error "The target directory must exist and have the basic structure (bin, sbin, usr)."
+        log_error ""
+        log_error "Possible reasons:"
+        log_error "  1. Running this script standalone without building rootfs first"
+        log_error "  2. Previous build stages (U-Boot/Linux/BusyBox) have not completed successfully"
+        log_error "  3. Using --stage 4 without running earlier stages first"
+        log_error ""
+        log_error "Solutions:"
+        log_error "  - Run the full build: ./scripts/release-all.sh"
+        log_error "  - Or build all stages first, then run this script on the existing rootfs"
         return 1
     }
 
@@ -270,7 +282,13 @@ main() {
 
     # Step 3: Check overlay exists
     log_info "Step 3: Checking overlay directory..."
-    check_overlay_exists "$OVERLAY_DIR" || exit 1
+    if ! check_overlay_exists "$OVERLAY_DIR"; then
+        log_info ""
+        log_info "Overlay directory does not exist or is empty: ${OVERLAY_DIR}"
+        log_info "Skipping overlay merge step..."
+        log_info "========================================"
+        exit 0
+    fi
     log_info ""
 
     # Step 4: Confirm action
