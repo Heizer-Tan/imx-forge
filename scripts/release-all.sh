@@ -296,7 +296,8 @@ main() {
 
     # Create build output directory
     # If release-latest exists, rename it to release-{datetime}
-    if [[ -d "${BUILD_OUTPUT_DIR}" ]]; then
+    # Note: Stage 4 should not clear the folder, as it depends on previous stages
+    if [[ -d "${BUILD_OUTPUT_DIR}" && "${SPECIFIC_STAGE}" != "4" ]]; then
         local datetime=$(date +%Y%m%d-%H%M%S)
         local archive_dir="${PROJECT_ROOT}/out/release-${datetime}"
         log_info "Archiving existing ${BUILD_OUTPUT_DIR} -> ${archive_dir}"
