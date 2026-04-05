@@ -12,6 +12,7 @@
 **面向 NXP i.MX6ULL 的嵌入式 Linux 开发工坊 —— 从工具链到 QT 应用的完整学习路径**
 
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](LICENSE)
+[![Contributors](https://img.shields.io/github/contributors/Awesome-Embedded-Learning-Studio/imx-forge?style=flat-square)](#-贡献者)
 [![WSL2](https://img.shields.io/badge/WSL2-Tested%20%26%20OK-brightgreen?style=flat-square)](#-wsl2-深度友好)
 [![Kernel](https://img.shields.io/badge/Kernel-dual%20track%20(6.12.3%20%2B%20mainline%207.0rc)-blue?style=flat-square)](#-双轨内核策略)
 [![Mainline](https://img.shields.io/badge/Mainline-migrated%20%EF%83%A0-brightgreen?style=flat-square)](#-双轨内核策略)
@@ -233,6 +234,28 @@ imx-forge/
 - [ ] 教程文档持续完善
 
 完整规划见 [document/todo/todo.md](document/todo/todo.md)。
+
+---
+
+## 👥 贡献者
+
+感谢所有为本项目做出贡献的开发者！
+
+<!-- 贡献者头像墙 - 自动更新 -->
+<a href="https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Awesome-Embedded-Learning-Studio/imx-forge" />
+</a>
+
+<!-- 贡献统计 -->
+[![Contributors](https://img.shields.io/github/contributors/Awesome-Embedded-Learning-Studio/imx-forge?style=flat-square)](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors)
+
+### 特别感谢 🎉
+
+- **[@Heizer-Tan](https://github.com/Heizer-Tan)** - 第一个外部贡献者！
+  - 修正 README 依赖描述
+  - 脚本优化改进
+
+感谢每一位贡献者的支持！
 
 ---
 
