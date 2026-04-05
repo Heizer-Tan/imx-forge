@@ -241,13 +241,9 @@ imx-forge/
 
 感谢所有为本项目做出贡献的开发者！
 
-<!-- 贡献者头像墙 - 自动更新 -->
-<a href="https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Awesome-Embedded-Learning-Studio/imx-forge" />
-</a>
-
-<!-- 贡献统计 -->
 [![Contributors](https://img.shields.io/github/contributors/Awesome-Embedded-Learning-Studio/imx-forge?style=flat-square)](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors)
+
+查看所有贡献者：[GitHub Contributors 页面](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors)
 
 ### 特别感谢 🎉
 
