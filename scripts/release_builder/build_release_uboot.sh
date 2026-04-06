@@ -144,6 +144,15 @@ log_step "5/5: Building U-Boot"
 
 cd "$PROJECT_ROOT"
 
+# 导入依赖检查脚本
+source "${SCRIPT_DIR}/../init/env-init.sh"
+
+# 检查依赖
+check_uboot_dependencies || {
+    log_error "Dependency check failed"
+    exit 1
+}
+
 log_info "Calling build-uboot.sh..."
 "${BUILD_HELPER_DIR}/build-uboot.sh"
 

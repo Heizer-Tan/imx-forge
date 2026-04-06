@@ -27,6 +27,9 @@ else
     log_cmd() { echo -e "${YELLOW}[CMD]${NC} $1"; }
 fi
 
+# 导入依赖检查脚本
+source "${SCRIPT_DIR}/../init/env-init.sh"
+
 # Configuration
 ARCH=arm
 CROSS_COMPILE=arm-none-linux-gnueabihf-
@@ -46,119 +49,7 @@ log_info "Using ${NPROC} parallel jobs"
 
 # Check host dependencies
 check_host_dependencies() {
-    log_info "Checking host dependencies..."
-
-    MISSING_PKGS=()
-    FOUND_PKGS=()
-
-    # Helper: check if command exists
-    check_cmd() {
-        local cmd=$1
-        local pkg=$2
-        if command -v ${cmd} &> /dev/null; then
-            FOUND_PKGS+=("${pkg}")
-            return 0
-        else
-            MISSING_PKGS+=("${pkg}")
-            return 1
-        fi
-    }
-
-    # Helper: check if dpkg package is installed
-    check_dpkg() {
-        local pkg=$1
-        if dpkg -s ${pkg} &> /dev/null; then
-            FOUND_PKGS+=("${pkg}")
-            return 0
-        else
-            MISSING_PKGS+=("${pkg}")
-            return 1
-        fi
-    }
-
-    # Helper: check if header file exists
-    check_header() {
-        local header=$1
-        local pkg=$2
-        if [ -f "${header}" ]; then
-            FOUND_PKGS+=("${pkg}")
-            return 0
-        else
-            MISSING_PKGS+=("${pkg}")
-            return 1
-        fi
-    }
-
-    # Helper: check Python module
-    check_python_module() {
-        local module=$1
-        local pkg=$2
-        if python3 -c "import ${module}" 2>/dev/null; then
-            FOUND_PKGS+=("${pkg}")
-            return 0
-        else
-            MISSING_PKGS+=("${pkg}")
-            return 1
-        fi
-    }
-
-    # Check build tools (use || true to prevent exit on set -e)
-    check_cmd gcc build-essential || true
-    check_cmd make build-essential || true
-    check_cmd bc bc || true
-    check_cmd bison bison || true
-    check_cmd flex flex || true
-    check_cmd dtc device-tree-compiler || true
-    check_cmd python3 python3 || true
-    check_cmd swig swig || true
-
-    # Check libssl via dpkg (more reliable than header check)
-    if dpkg -s libssl-dev &> /dev/null; then
-        FOUND_PKGS+=("libssl-dev")
-    else
-        MISSING_PKGS+=("libssl-dev")
-    fi
-
-    # Check libgnutls via dpkg or header
-    if dpkg -s libgnutls28-dev &> /dev/null || [ -f /usr/include/gnutls/gnutls.h ]; then
-        FOUND_PKGS+=("libgnutls28-dev")
-    else
-        MISSING_PKGS+=("libgnutls28-dev")
-    fi
-
-    # Check libncurses via dpkg or header
-    if dpkg -s libncurses-dev &> /dev/null || [ -f /usr/include/ncursesw/ncurses.h ] || [ -f /usr/include/ncurses/ncurses.h ]; then
-        FOUND_PKGS+=("libncurses-dev")
-    else
-        MISSING_PKGS+=("libncurses-dev")
-    fi
-
-    # Check pyelftools Python module
-    check_python_module elftools python3-pyelftools || true
-
-    # Remove duplicates from FOUND_PKGS and MISSING_PKGS
-    FOUND_PKGS=($(echo "${FOUND_PKGS[@]}" | tr ' ' '\n' | sort -u))
-    MISSING_PKGS=($(echo "${MISSING_PKGS[@]}" | tr ' ' '\n' | sort -u))
-
-    # Display results
-    for pkg in "${FOUND_PKGS[@]}"; do
-        log_info "  ✓ ${pkg}"
-    done
-
-    for pkg in "${MISSING_PKGS[@]}"; do
-        log_warn "  ✗ ${pkg} (not found)"
-    done
-
-    if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
-        log_error "Missing dependencies: ${MISSING_PKGS[*]}"
-        echo ""
-        log_info "Install missing packages with:"
-        echo -e "  ${YELLOW}sudo apt install ${MISSING_PKGS[*]}${NC}"
-        echo ""
-        exit 1
-    fi
-
-    log_info "All host dependencies found"
+    check_uboot_dependencies || exit 1
 }
 
 # Check if toolchain exists

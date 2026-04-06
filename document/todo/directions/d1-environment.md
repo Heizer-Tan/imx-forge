@@ -170,7 +170,7 @@
 - [ ] 提供使用文档
 
 **相关文件**：
-- `scripts/env-init.sh`
+- `scripts/init/env-init.sh`
 - `document/tutorial/start/02_env_init_guide.md`（新增）
 
 ---
