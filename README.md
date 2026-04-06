@@ -243,31 +243,29 @@ imx-forge/
 
 [![Contributors](https://img.shields.io/github/contributors/Awesome-Embedded-Learning-Studio/imx-forge?style=flat-square)](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors)
 
-查看所有贡献者：[GitHub Contributors 页面](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors)
+- **完整贡献者列表**: [CONTRIBUTORS.md](CONTRIBUTORS.md)
+- **GitHub Contributors 页面**: [查看详情](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/graphs/contributors)
 
-### 特别感谢 🎉
-
-- **[@Heizer-Tan](https://github.com/Heizer-Tan)** - 第一个外部贡献者！
-  - 修正 README 依赖描述
-  - 脚本优化改进
-
-感谢每一位贡献者的支持！
+感谢每一位贡献者的支持！🎉
 
 ---
 
 ## 🤝 贡献指南
 
-欢迎提交 PR 与 Issue！
+我们欢迎各种形式的贡献！
+
+**完整贡献指南**: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+**快速开始**：
+- 🐛 [报告 Bug](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/issues)
+- ✨ [提出功能请求](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/issues)
+- 📝 [改进文档](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/CONTRIBUTING.md#-如何贡献)
+- 🔧 [提交代码](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/CONTRIBUTING.md#-开发工作流)
 
 **补丁命名规范**：
 - `[linux-imx]` 前缀 —— NXP BSP 轨道补丁
 - `[mainline]` 前缀 —— 上游内核轨道补丁
 - `[uboot]` 前缀 —— U-Boot 补丁
-
-**文档贡献**：
-- 教程改进建议
-- 错误修复
-- 新示例代码
 
 ---
 
@@ -282,6 +280,8 @@ MIT LICENSE —— 详见 [LICENSE](LICENSE)
 ## 🔗 相关链接
 
 - **快速入门**: [QUICK_START.md](QUICK_START.md)
+- **贡献指南**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **贡献者列表**: [CONTRIBUTORS.md](CONTRIBUTORS.md)
 - **教程目录**: [document/tutorial/](document/tutorial/)
 - **问题反馈**: [GitHub Issues](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/issues)
 - **项目规划**: [document/todo/todo.md](document/todo/todo.md)
