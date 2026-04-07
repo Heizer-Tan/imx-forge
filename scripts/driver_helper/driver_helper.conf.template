@@ -1,0 +1,21 @@
+# 驱动辅助脚本配置文件
+#
+# 这个文件包含了驱动辅助脚本的默认配置值
+# 修改此文件后，所有脚本将使用新的默认值
+#
+
+# 默认板卡名称
+DEFAULT_BOARD="alpha-board"
+
+# 默认内核类型 (mainline 或 imx)
+DEFAULT_KERNEL_TYPE="mainline"
+
+# TFTP 部署目录
+TFTP_DIR="/srv/tftp"
+
+# NFS 目录（相对于项目根目录）
+NFS_DIR="rootfs/nfs"
+
+# 远程部署配置
+REMOTE_HOST=""
+REMOTE_PATH="/lib/modules"

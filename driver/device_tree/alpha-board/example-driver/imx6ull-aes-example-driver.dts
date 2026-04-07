@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+//
+// Example驱动设备树模板
+//
+// 这是一个包含真实 include 的设备树模板
+// 设备节点是假的，但 include 路径是真实的
+// 可以作为其他驱动开发的参考
+
+/dts-v1/;
+
+#include "imx6ull.dtsi"
+#include "imx6ull-aes.dtsi"
+
+/ {
+	model = "Awesome Embedded Studio IMX6ULL Example Driver";
+	compatible = "fsl,imx6ull-14x14-evk", "fsl,imx6ull";
+
+	/*
+	 * 假设备示例 - 用于演示设备树结构和编译
+	 *
+	 * 这是一个假的 I2C 设备示例
+	 * 实际开发时，修改 compatible 和其他属性来匹配你的真实设备
+	 */
+	fake_i2c_device: fake-i2c@50 {
+		compatible = "fake,i2c-device";
+		reg = <0x50>;
+		status = "disabled";
+	};
+
+	/*
+	 * 假设备示例 - SPI 设备
+	 */
+	fake_spi_device: fake-spi@0 {
+		compatible = "fake,spi-device";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+		status = "disabled";
+	};
+
+	/*
+	 * 假设备示例 - GPIO 设备
+	 */
+	fake_gpio_device: fake-gpio-device {
+		compatible = "fake,gpio-device";
+		gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
+		status = "disabled";
+	};
+
+	/*
+	 * 假设备示例 - 平台设备
+	 * 用于不在标准总线上的设备
+	 */
+	fake_platform_device: fake-platform {
+		compatible = "fake,platform-device";
+		reg = <0x00000000 0x1000>;
+		interrupts = <0 0 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clks IMX6UL_CLK_DUMMY>;
+		clock-names = "dummy";
+		status = "disabled";
+	};
+};

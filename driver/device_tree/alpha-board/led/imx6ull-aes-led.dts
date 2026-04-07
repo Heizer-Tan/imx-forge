@@ -1,0 +1,27 @@
+/dts-v1/;
+#include "imx6ull.dtsi"
+#include "imx6ull-aes.dtsi"
+
+/ {
+	led_controller {
+		compatible = "imx-led";
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&led_pinctrl>;
+
+		led@0 {
+			reg = <0>;
+			label = "user-led";
+			gpios = <&gpio1 3 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+	};
+};
+
+&iomuxc {
+	led_pinctrl: ledgrp {
+		fsl,pins = <
+			MX6UL_PAD_GPIO1_IO03__GPIO1_IO03 0x17059
+		>;
+	};
+};

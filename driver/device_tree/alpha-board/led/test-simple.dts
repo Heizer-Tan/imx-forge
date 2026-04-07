@@ -1,0 +1,6 @@
+/dts-v1/;
+/ {
+	test_node {
+		status = "okay";
+	};
+};
