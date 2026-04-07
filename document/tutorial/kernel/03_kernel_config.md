@@ -53,12 +53,14 @@ defconfig文件位于`arch/arm/configs/`目录：
 
 ```bash
 arch/arm/configs/
-├── imx_aes_defconfig           # NXP i.MX AES引擎支持的配置
-├── imx_v6_v7_defconfig         # i.MX 6/7系列通用配置
-├── imx_v7_defconfig            # i.MX 7系列配置
-├── multi_v7_defconfig          # 多平台v7配置
+├── imx_aes_defconfig           # IMX-Forge 自定义配置（应用补丁后）
+├── imx_v6_v7_defconfig         # NXP 官方：i.MX 6/7系列通用配置
+├── imx_v7_defconfig            # NXP 官方：i.MX 7系列配置
+├── multi_v7_defconfig          # NXP 官方：多平台v7配置
 └── ...
 ```
+
+> **注意：** `imx_aes_defconfig` 是 IMX-Forge 项目自定义的配置文件，需要先应用补丁才能使用。如果你直接使用 NXP 官方的 linux-imx 仓库，请使用 `imx_v7_defconfig` 或 `imx_v6_v7_defconfig`。
 
 打开一个defconfig看看内容：
 

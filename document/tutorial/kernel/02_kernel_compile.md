@@ -113,13 +113,39 @@ make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- O=out/linux imx_aes_defcon
 
 这里解释一下这三个变量的作用。`ARCH=arm`告诉内核目标架构是ARM，它会在`arch/arm/`目录下找架构相关代码。`CROSS_COMPILE=arm-none-linux-gnueabihf-`指定交叉编译器前缀。`O=out/linux`指定输出目录。
 
-`imx_aes_defconfig`是NXP为i.MX6ULL准备的默认配置。defconfig文件位于`arch/arm/configs/`目录下：
+`imx_aes_defconfig`是IMX-Forge项目为i.MX6ULL定制的默认配置。
+
+> **⚠️ 重要提示**
+>
+> `imx_aes_defconfig` **不是NXP官方提供的配置文件**，而是IMX-Forge项目自定义的配置。
+> 这个配置文件需要通过应用项目补丁后才会生成到linux-imx仓库中。
+>
+> **使用方式：**
+>
+> 1. **使用IMX-Forge构建系统（推荐）**
+>    ```bash
+>    ./scripts/build_helper/build-linux.sh  # 自动应用补丁并构建
+>    ```
+>
+> 2. **手动操作：需要先应用补丁**
+>    ```bash
+>    cd third_party/linux-imx
+>    git apply ../../patches/linux-imx/linux-imx-latest.patch
+>    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- O=../../out/linux imx_aes_defconfig
+>    ```
+>
+> 3. **NXP官方仓库：使用官方配置**
+>    ```bash
+>    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- O=out/linux imx_v7_defconfig
+>    ```
+
+IMX-Forge项目应用补丁后，defconfig文件位于`arch/arm/configs/`目录下：
 
 ```bash
 arch/arm/configs/
-├── imx_aes_defconfig
-├── imx_v6_v7_defconfig
-├── imx_v7_defconfig
+├── imx_aes_defconfig          # IMX-Forge 自定义配置（应用补丁后）
+├── imx_v6_v7_defconfig        # NXP 官方：i.MX 6/7系列通用配置
+├── imx_v7_defconfig           # NXP 官方：i.MX 7系列配置（推荐用于i.MX6ULL）
 └── ...
 ```
 

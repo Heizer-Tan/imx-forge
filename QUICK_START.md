@@ -362,7 +362,10 @@ export CROSS_COMPILE=arm-none-linux-gnueabihf-
 # 进入源码目录
 cd third_party/linux-imx
 
-# 配置
+# ⚠️ 应用 IMX-Forge 补丁（包含 imx_aes_defconfig）
+git apply ../../patches/linux-imx/linux-imx-latest.patch
+
+# 配置（使用 IMX-Forge 自定义的 imx_aes_defconfig）
 make imx_aes_defconfig O=../../out/linux
 
 # 如需自定义配置
@@ -371,6 +374,8 @@ make menuconfig O=../../out/linux
 # 编译
 make -j8 O=../../out/linux
 ```
+
+> **注意：** `imx_aes_defconfig` 是 IMX-Forge 项目自定义配置，需要先应用补丁。如果你想使用 NXP 官方配置，请改用 `imx_v7_defconfig`。
 
 #### Linux 内核手动构建（Mainline）
 

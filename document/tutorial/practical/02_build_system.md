@@ -309,6 +309,8 @@ make -C third_party/linux-imx ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- O
 
 这里使用 `imx_aes_defconfig` 配置，针对 i.MX6ULL 平台进行了优化。
 
+> **注意：** `imx_aes_defconfig` 是 IMX-Forge 项目自定义的配置文件（包含通过补丁添加的 AES 板卡支持），在使用前需要确保已应用项目补丁。构建脚本会自动处理补丁应用。
+
 **经验**：如果想自定义内核配置，可以运行 `make menuconfig`：
 
 ```bash
