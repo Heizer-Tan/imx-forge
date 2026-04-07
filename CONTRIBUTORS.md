@@ -17,6 +17,11 @@
 - **GitHub**: [Heizer-Tan](https://github.com/Heizer-Tan)
 - **贡献**: README 修正、脚本优化
 
+### Anonymous
+- Anonymous (via email: 85.hear.blimps@icloud.com)
+- **贡献**: 指出了 U-Boot 教程中关于自定义命令添加的文档疏漏，包括 Makefile 配置和头文件引用问题
+
+
 ---
 
 ## 如何成为贡献者

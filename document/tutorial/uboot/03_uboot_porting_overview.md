@@ -459,10 +459,15 @@ ls include/configs/ | grep mx6ull
 
 U-Boot命令行里的命令（boot、md、mw、dhcp、tftp）都在这。如果你要添加自定义命令，在这里加。
 
-比如你想添加一个hello命令：
+比如你想添加一个hello命令，需要完成以下步骤：
+
+**第一步：创建hello.c文件**
+
+在`cmd/`目录下创建`hello.c`文件：
+
 ```c
-#include <common.h>
 #include <command.h>
+#include <stdio.h>
 
 static int do_hello(struct cmd_tbl *cmdtp, int flag, int argc,
                    char *const argv[])
@@ -478,7 +483,31 @@ U_BOOT_CMD(
 );
 ```
 
-把这个文件保存为cmd/hello.c，重新编译，U-Boot就有hello命令了。
+> **注意**：在U-Boot 2025.04等新版本中，`<common.h>`头文件已经不可用，正确的头文件是`<command.h>`和`<stdio.h>`。如果使用旧的头文件会导致编译失败。
+
+**第二步：修改cmd/Makefile**
+
+仅将hello.c放入cmd/目录并不会自动参与编译，还需要在`cmd/Makefile`中显式添加。打开`cmd/Makefile`文件，在适当位置添加：
+
+```makefile
+obj-y += hello.o
+```
+
+或者更规范的方式（如果命令支持配置选项）：
+
+```makefile
+obj-$(CONFIG_CMD_HELLO) += hello.o
+```
+
+**第三步：重新编译**
+
+```bash
+make -j$(nproc)
+```
+
+编译完成后，U-Boot就有hello命令了。
+
+> **重要提示**：如果不修改Makefile，即使hello.c文件存在，也不会生成对应的目标文件，命令不会出现在U-Boot命令列表中。这是初学者容易遇到的常见问题。
 
 `common/` —— **通用功能代码**
 
