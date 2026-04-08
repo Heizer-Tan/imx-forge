@@ -63,8 +63,8 @@ scripts/
 
 ## 📖 延伸阅读
 
-- [构建系统文档](../architecture/BUILD_SYSTEM.md)
-- [补丁系统文档](../architecture/PATCH_SYSTEM.md)
+- [构建系统文档](../architecture/BUILD_SYSTEM)
+- [补丁系统文档](../architecture/PATCH_SYSTEM)
 
 ---
 

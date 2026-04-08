@@ -193,11 +193,11 @@
 
 ## 🔗 相关资源
 
-- **主路线图**：[roadmap.md](../roadmap.md)
-- **D1 详情**：[d1-environment.md](./d1-environment.md)
-- **D2 详情**：[d2-tools.md](./d2-tools.md)
-- **PROJ-001 详情**：[projects/proj-001-env-monitor.md](../projects/proj-001-env-monitor.md)
-- **PROJ-002 详情**：[projects/proj-002-image-analyzer.md](../projects/proj-002-image-analyzer.md)
+- **主路线图**：[roadmap.md](../roadmap)
+- **D1 详情**：[d1-environment.md](./d1-environment)
+- **D2 详情**：[d2-tools.md](./d2-tools)
+- **PROJ-001 详情**：[projects/proj-001-env-monitor.md](../projects/proj-001-env-monitor)
+- **PROJ-002 详情**：[projects/proj-002-image-analyzer.md](../projects/proj-002-image-analyzer)
 
 ---
 

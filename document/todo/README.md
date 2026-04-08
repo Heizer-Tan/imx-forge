@@ -10,16 +10,16 @@
 
 如果你是第一次了解 IMX-Forge，建议按以下顺序阅读：
 
-1. **📖 [总体路线图](roadmap.md)** - 了解项目全貌和发展规划
-2. **📦 [v0.5 归档](archive/v0.5-milestone.md)** - 了解已完成的工作
-3. **🎯 [当前重点：D1 方向](directions/d1-environment.md)** - 查看环境完善方向
+1. **📖 [总体路线图](roadmap)** - 了解项目全貌和发展规划
+2. **📦 [v0.5 归档](archive/v0.5-milestone)** - 了解已完成的工作
+3. **🎯 [当前重点：D1 方向](directions/d1-environment)** - 查看环境完善方向
 
 ### 贡献者入口
 
 如果你想参与项目开发：
 
-1. **📋 [任务总览](todo.md)** - 查看所有待办任务
-2. **🗺️ [路线图](roadmap.md)** - 选择你感兴趣的方向
+1. **📋 [任务总览](todo)** - 查看所有待办任务
+2. **🗺️ [路线图](roadmap)** - 选择你感兴趣的方向
 3. **📁 [方向详情](directions/)** - 查看具体任务
 4. **🎯 [示例项目](projects/)** - 查看项目清单
 
@@ -31,25 +31,25 @@
 
 | 文档 | 说明 | 适合人群 |
 |------|------|----------|
-| [roadmap.md](roadmap.md) | 项目总体路线图 | 所有用户 |
-| [todo.md](todo.md) | 任务总览和快速导航 | 所有用户 |
-| [project.md](project.md) | 原项目清单（已整合） | 参考 |
+| [roadmap.md](roadmap) | 项目总体路线图 | 所有用户 |
+| [todo.md](todo) | 任务总览和快速导航 | 所有用户 |
+| [projects/](projects/) | 示例项目详情 | 参考 |
 
 ### 发展方向
 
 | 方向 | 重点 | 说明 |
 |---------|------|------|
-| [D1: 环境完善](directions/d1-environment.md) | Docker 化、辅助脚本 | 开发环境搭建 |
-| [D2: 工具完备](directions/d2-tools.md) | CI/CD、多板卡支持 | 提升开发效率 |
-| [D3: 示例展示](directions/d3-examples.md) | QT6 示例、旗舰项目 | 展示项目能力 |
-| [D4: 生态成熟](directions/d4-ecosystem.md) | 多 Rootfs、精品项目 | 建设完整生态 |
+| [D1: 环境完善](directions/d1-environment) | Docker 化、辅助脚本 | 开发环境搭建 |
+| [D2: 工具完备](directions/d2-tools) | CI/CD、多板卡支持 | 提升开发效率 |
+| [D3: 示例展示](directions/d3-examples) | QT6 示例、旗舰项目 | 展示项目能力 |
+| [D4: 生态成熟](directions/d4-ecosystem) | 多 Rootfs、精品项目 | 建设完整生态 |
 
 ### 项目文档
 
 | 项目 ID | 项目名称 | 类型 | 状态 |
 |---------|----------|------|------|
-| [PROJ-001](projects/proj-001-env-monitor.md) | 便携式环境监测站 | 🥇 旗舰 | 📋 |
-| [PROJ-002](projects/proj-002-image-analyzer.md) | 嵌入式图像分析仪 | 🥇 旗舰 | 📋 |
+| [PROJ-001](projects/proj-001-env-monitor) | 便携式环境监测站 | 🥇 旗舰 | 📋 |
+| [PROJ-002](projects/proj-002-image-analyzer) | 嵌入式图像分析仪 | 🥇 旗舰 | 📋 |
 | PROJ-003 | 网络协议分析仪 | 🥈 精品 | 📋 |
 | PROJ-004 | 复古掌机模拟器 | 🥈 精品 | 📋 |
 | PROJ-005 | 工业级调试工具 | 🥈 精品 | 📋 |
@@ -60,7 +60,7 @@
 
 | 文档 | 版本 | 完成时间 | 说明 |
 |------|------|----------|------|
-| [v0.5 里程碑](archive/v0.5-milestone.md) | v0.5 | 2026-03 | Mainline 内核、QT6 流水线 |
+| [v0.5 里程碑](archive/v0.5-milestone) | v0.5 | 2026-03 | Mainline 内核、QT6 流水线 |
 
 ---
 
@@ -90,7 +90,7 @@
 - VS Code Devcontainer
 
 **参与方式**：
-1. 查看 [D1 详情](directions/d1-environment.md)
+1. 查看 [D1 详情](directions/d1-environment)
 2. 根据你的情况选择合适的任务
 3. 在 GitHub Issues 中声明
 4. 开始开发！
@@ -99,10 +99,9 @@
 
 ## 🔗 相关链接
 
-- **项目主页**：[../../README.md](../../README.md)
-- **快速开始**：[../../QUICK_START.md](../../QUICK_START.md)
+- **项目主页**：[GitHub 仓库](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge)
+- **快速开始**：[QUICK_START](../QUICK_START)
 - **教程目录**：[../tutorial/](../tutorial/)
-- **GitHub 仓库**：[https://github.com/Awesome-Embedded-Learning-Studio/imx-forge](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge)
 
 ---
 
@@ -120,14 +119,14 @@
 
 ### 贡献流程
 
-1. 阅读 [路线图](roadmap.md) 和 [任务总览](todo.md)
+1. 阅读 [路线图](roadmap) 和 [任务总览](todo)
 2. 选择你感兴趣的任务
 3. 在 GitHub Issues 中声明你的意图
 4. Fork 项目并创建分支
 5. 提交 Pull Request
 6. 等待 Code Review
 
-详见：[../../CONTRIBUTING.md](../../CONTRIBUTING.md)
+详见：GitHub 仓库的贡献指南
 
 ---
 
@@ -135,7 +134,7 @@
 
 ### Q: 我应该从哪里开始？
 
-**A**: 如果你是新用户，建议从 [roadmap.md](roadmap.md) 开始。如果你想贡献代码，查看 [todo.md](todo.md) 或 [D1 方向](directions/d1-environment.md)。
+**A**: 如果你是新用户，建议从 [roadmap.md](roadmap) 开始。如果你想贡献代码，查看 [todo.md](todo) 或 [D1 方向](directions/d1-environment)。
 
 ### Q: 方向和里程碑有什么区别？
 
@@ -151,11 +150,11 @@
 
 ### Q: 如何查看项目进度？
 
-**A**: 主路线图 [roadmap.md](roadmap.md) 有详细的进度说明和发展方向介绍。
+**A**: 主路线图 [roadmap.md](roadmap) 有详细的进度说明和发展方向介绍。
 
-### Q: project.md 和新的 projects/ 目录有什么区别？
+### Q: 如何查看项目详情？
 
-**A**: `project.md` 是原始的项目清单，现在已经被整合到 `projects/` 目录中。新的 `projects/` 目录为每个项目提供独立的详细文档。
+**A**: 请查看 [projects/](projects/) 目录，其中包含各个示例项目的详细文档。
 
 ---
 

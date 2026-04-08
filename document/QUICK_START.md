@@ -788,10 +788,10 @@ git submodule update --remote --merge
 接下来你可以：
 
 1. **深入学习** —— 阅读项目教程文档
-   - [工具链教程](document/tutorial/start/01_start_from_toolchain.md)
-   - [U-Boot 教程](document/tutorial/uboot/01_what_is_uboot.md)
-   - [内核教程](document/tutorial/kernel)
-   - [Rootfs 教程](document/tutorial/rootfs/01_rootfs_overview.md)
+   - [工具链教程](../tutorial/start/01_start_from_toolchain)
+   - [U-Boot 教程](../tutorial/uboot/01_what_is_uboot)
+   - [内核教程](../tutorial/kernel)
+   - [Rootfs 教程](../tutorial/rootfs/01_rootfs_overview)
 
 2. **自定义配置** —— 根据你的需求修改系统
    - 使用 `make menuconfig` 自定义内核配置
@@ -799,22 +799,20 @@ git submodule update --remote --merge
    - 扩展 rootfs 添加更多功能
 
 3. **网络开发** —— 设置 TFTP/NFS 提高开发效率
-   - 参考 [WSL2 TFTP 配置指南](document/tutorial/_temp/linux_imx6ull-wsl2-tftp-guide.md)
+   - 参考 kernel 网络启动教程
 
 4. **驱动开发** —— 学习编写 Linux 驱动程序
-   - 参考 [driver/base_driver/](driver/base_driver/) 基础驱动框架
-   - 参考 [driver/led/](driver/led/) LED 驱动示例
+   - 参考 [驱动开发教程](../tutorial/driver)
 
 5. **QT 应用开发** —— 构建 GUI 应用
-   - 使用 [qt-compile-pipeline](third_party/qt-compile-pipeline/) 交叉编译 QT6
-   - 参考 [examples/qt/](examples/qt/) QT 示例
+   - 使用 qt-compile-pipeline 交叉编译 QT6
 
 ---
 
 ## 参考资料
 
-- [README.md](README.md) —— 项目主文档
-- [document/todo/todo.md](document/todo/todo.md) —— 项目规划
+- [项目主页](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge) —— GitHub 仓库
+- [项目规划](todo/) —— 待办事项
 - [U-Boot 官方文档](https://www.denx.de/wiki/U-Boot)
 - [Linux 内核文档](https://www.kernel.org/doc/html/latest/)
 - [BusyBox 官方网站](https://busybox.net/)

@@ -882,10 +882,10 @@ sdma: dma-controller@20ec000 {
 
 ## 相关文档
 
-- [Rootfs 概述](../../tutorial/rootfs/01_rootfs_overview.md) - Rootfs 的基本概念
-- [设备驱动开发](../../tutorial/practical/05_device_driver.md) - Linux 设备驱动
-- [varified_rootfs_ok.sh](../varified_rootfs_ok.sh.md) - 调用此脚本的上级脚本
-- [install_libc.sh](third_party_install/install_libc.sh.md) - libc 安装脚本
+- Rootfs 概述 - Rootfs 的基本概念
+- 设备驱动开发 - Linux 设备驱动
+- [varified_rootfs_ok.sh](../varified_rootfs_ok.sh) - 调用此脚本的上级脚本
+- install_libc.sh - libc 安装脚本
 - [i.MX6 参考手册](https://www.nxp.com/docs/en/reference-manual/IMX6DQRM.pdf) - NXP 官方文档
 
 ## 更新日志

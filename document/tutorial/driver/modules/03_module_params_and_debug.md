@@ -1034,9 +1034,9 @@ cat third_party/linux-imx/drivers/video/logo/logo.c | grep -A2 "module_param"
 
 - [Linux内核文档：kernel-parameters.txt](https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html)
 - [Linux内核文档：dynamic-debug-howto](https://www.kernel.org/doc/html/latest/admin-guide/dynamic-debug-howto.html)
-- [内核源码：include/linux/moduleparam.h](third_party/linux-imx/include/linux/moduleparam.h)
-- [内核源码：kernel/params.c](third_party/linux-imx/kernel/params.c)
-- [内核源码：include/linux/dynamic_debug.h](third_party/linux-imx/include/linux/dynamic_debug.h)
+- 内核源码：include/linux/moduleparam.h
+- 内核源码：kernel/params.c
+- 内核源码：include/linux/dynamic_debug.h
 
 ---
 

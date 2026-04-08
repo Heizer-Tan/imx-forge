@@ -168,8 +168,8 @@ check_busybox_dependencies || exit 1
 **详细的依赖检查逻辑**：
 
 请参考以下文档：
-- [env-init.sh 源码](../../init/env-init.sh)
-- [环境初始化指南](../../tutorial/start/02_env_init_guide.md)
+- env-init.sh 源码
+- 环境初始化指南
 
 #### check_toolchain()
 
@@ -679,6 +679,6 @@ INSTALL_DIR="${PROJECT_ROOT}/rootfs/custom"
 
 ## 相关文档
 
-- [BusyBox 编译教程](../../tutorial/rootfs/02_busybox_compile.md) - BusyBox 编译的详细原理
-- [根文件系统结构](../../tutorial/rootfs/04_rootfs_structure.md) - rootfs 目录结构说明
-- [应用集成](../../tutorial/rootfs/06_apps_integration.md) - 如何将应用集成到 rootfs
+- BusyBox 编译教程 - BusyBox 编译的详细原理
+- 根文件系统结构 - rootfs 目录结构说明
+- 应用集成 - 如何将应用集成到 rootfs

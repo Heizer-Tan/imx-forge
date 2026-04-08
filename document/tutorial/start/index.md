@@ -6,7 +6,7 @@
 
 ## 📚 章节
 
-- **[01. 工具链安装](01_start_from_toolchain.md)**
+- **[01. 工具链安装](01_start_from_toolchain)**
 
   安装和配置 ARM GNU Toolchain 15.2，这是交叉编译的基础。
 

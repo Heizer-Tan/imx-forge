@@ -1044,13 +1044,13 @@ verify_rootfs() {
 
 ## 相关文档
 
-- [Rootfs 概述](../../tutorial/rootfs/01_rootfs_overview.md) - Rootfs 的基本概念
-- [BusyBox 编译](../../tutorial/rootfs/02_busybox_compile.md) - BusyBox 编译安装
-- [inittab 与 init 系统](../../tutorial/rootfs/03_inittab_init.md) - init 系统详解
-- [Rootfs 目录结构](../../tutorial/rootfs/04_rootfs_structure.md) - 目录结构详解
-- [应用集成](../../tutorial/rootfs/06_apps_integration.md) - 如何添加自定义应用
-- [build-busybox.sh](build_helper/build-busybox.sh.md) - BusyBox 构建脚本
-- [install_libc.sh](third_party_install/install_libc.sh.md) - libc 安装脚本
+- Rootfs 概述 - Rootfs 的基本概念
+- BusyBox 编译 - BusyBox 编译安装
+- inittab 与 init 系统 - init 系统详解
+- Rootfs 目录结构 - 目录结构详解
+- 应用集成 - 如何添加自定义应用
+- [build-busybox.sh](build_helper/build-busybox.sh) - BusyBox 构建脚本
+- install_libc.sh - libc 安装脚本
 
 ## 更新日志
 

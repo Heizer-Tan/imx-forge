@@ -887,6 +887,6 @@ build_and_install_qt6() {
 
 ## 相关文档
 
-- [build-busybox.sh](build_helper/build-busybox.sh.md) - BusyBox 构建脚本
-- [varified_rootfs_ok.sh](varified_rootfs_ok.sh.md) - RootFS 验证脚本
-- [根文件系统教程](../../tutorial/rootfs/) - RootFS 相关教程
+- [build-busybox.sh](./build_helper/build-busybox.sh) - BusyBox 构建脚本
+- [varified_rootfs_ok.sh](./varified_rootfs_ok.sh) - RootFS 验证脚本
+- 根文件系统教程 - RootFS 相关教程

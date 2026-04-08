@@ -1290,11 +1290,11 @@ convert document/logo/logo.png -resize 800x480! -alpha off -depth 8 bmp3:test.bm
 
 ### C. 参考文档
 
-- [U-Boot 教程](../tutorial/uboot/01_what_is_uboot.md)
-- [Linux 内核教程](../tutorial/kernel/01_kernel_overview.md)
-- [Rootfs 教程](../tutorial/rootfs/01_rootfs_overview.md)
-- [工具链教程](../tutorial/start/01_start_from_toolchain.md)
-- [实践构建指南](../tutorial/practical/02_build_system.md)
+- [U-Boot 教程](../tutorial/uboot/01_what_is_uboot)
+- [Linux 内核教程](../tutorial/kernel/01_kernel_overview)
+- [Rootfs 教程](../tutorial/rootfs/01_rootfs_overview)
+- [工具链教程](../tutorial/start/01_start_from_toolchain)
+- [实践构建指南](../tutorial/practical/02_build_system)
 
 ---
 

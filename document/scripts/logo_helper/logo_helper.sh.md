@@ -962,10 +962,10 @@ static int lcd_display_bitmap(ulong bmp_image, int x, int y)
 
 ## 相关文档
 
-- [U-Boot构建脚本](../build_helper/build-uboot.sh.md) - 调用此脚本的构建脚本
-- [Logo和启动画面教程](../../tutorial/uboot/08_logo_splash.md) - Logo配置详解
-- [LCD移植指南](../../tutorial/uboot/06_lcd_porting.md) - LCD显示配置
-- [U-Boot环境变量配置](../../tutorial/uboot/04_board_config_basic.md) - 环境变量设置
+- [U-Boot构建脚本](../build_helper/build-uboot.sh) - 调用此脚本的构建脚本
+- Logo和启动画面教程 - Logo配置详解
+- LCD移植指南 - LCD显示配置
+- U-Boot环境变量配置 - 环境变量设置
 
 ## 更新日志
 

@@ -800,7 +800,7 @@ libc.so.6 -> libc-2.31.so
 
 ## 相关文档
 
-- [构建根文件系统](../../tutorial/rootfs/01_rootfs_introduction.md) - rootfs 构建概述
-- [动态链接详解](../../tutorial/practical/02_dynamic_linking.md) - 动态链接原理
-- [交叉编译工具链](../../tutorial/practical/01_cross_compile.md) - 工具链使用
-- [varified_rootfs_ok.sh](../rootfs/varified_rootfs_ok.sh.md) - 调用此脚本的上级脚本
+- 构建根文件系统 - rootfs 构建概述
+- 动态链接详解 - 动态链接原理
+- 交叉编译工具链 - 工具链使用
+- [varified_rootfs_ok.sh](../rootfs/varified_rootfs_ok.sh) - 调用此脚本的上级脚本

@@ -25,9 +25,8 @@
 
 如果你是第一次来这里，建议按照以下顺序阅读：
 
-1. **[快速入门指南](../QUICK_START.md)** —— 5分钟快速体验项目
-2. **[项目 README](../README.md)** —— 了解项目概况和特性
-3. **[教程目录](tutorial/)** —— 开始系统学习
+1. **[快速入门指南](QUICK_START/)** —— 5分钟快速体验项目
+2. **[教程目录](tutorial/)** —— 开始系统学习
 
 ---
 
@@ -44,34 +43,34 @@
 | **[内核教程](tutorial/kernel/)** | 内核配置、设备树、驱动开发 | ✅ 完整 |
 | **[Mainline 内核](tutorial/kernel/mainline/)** | 上游主线内核迁移 | ✅ 已完成 |
 | **[根文件系统](tutorial/rootfs/)** | BusyBox、inittab、NFS 挂载 | ✅ 完整 |
-| **[驱动开发](tutorial/driver/)** | 驱动编写、模块、固件 | 🚧 WIP |
+| **驱动开发** | 驱动编写、模块、固件 | 🚧 WIP |
 | **[实战演练](tutorial/practical/)** | 完整项目实战 | ✅ 基础完成 |
 
 ### 架构文档 (Architecture)
 
 深入了解项目的设计和实现：
 
-- **[系统架构](architecture/SYSTEM_ARCHITECTURE.md)** —— 整体架构设计
-- **[构建系统](architecture/BUILD_SYSTEM.md)** —— 构建脚本详解
-- **[补丁系统](architecture/PATCH_SYSTEM.md)** —— 双轨补丁管理
+- **[系统架构](architecture/SYSTEM_ARCHITECTURE/)** —— 整体架构设计
+- **[构建系统](architecture/BUILD_SYSTEM/)** —— 构建脚本详解
+- **[补丁系统](architecture/PATCH_SYSTEM/)** —— 双轨补丁管理
 
 ### 开发指南 (Development)
 
-- **[环境搭建](development/ENVIRONMENT_SETUP.md)** —— 开发环境配置
+- **[环境搭建](development/ENVIRONMENT_SETUP/)** —— 开发环境配置
 
 ### 参考手册 (Reference)
 
-- **[设备树指南](modules/DEVICE_TREE_GUIDE.md)** —— 设备树完全参考
+- **[设备树指南](modules/DEVICE_TREE_GUIDE/)** —— 设备树完全参考
 
 ### 脚本文档 (Scripts)
 
 - **[构建脚本](scripts/)** —— 构建系统脚本说明
-- **[补丁工具](scripts/patch_maker.sh.md)** —— 补丁生成工具
+- **[补丁工具](scripts/patch_maker.sh/)** —— 补丁生成工具
 
 ### 项目规划 (Todo)
 
-- **[项目规划](todo/project.md)** —— 功能规划
-- **[待办事项](todo/todo.md)** —— 当前进度
+- **[路线图](todo/roadmap/)** —— 项目发展规划
+- **[待办事项](todo/)** —— 当前进度
 
 ---
 
@@ -149,7 +148,7 @@ graph LR
 
 欢迎贡献文档！请参考：
 
-- **贡献指南**: [README.md - 贡献指南](../README.md#-贡献指南)
+- **贡献指南**: 请查看 GitHub 仓库
 - **补丁规范**:
   - `[linux-imx]` —— NXP BSP 轨道
   - `[mainline]` —— 上游内核轨道

@@ -928,6 +928,6 @@ return 0;
 **延伸阅读**
 
 - [Linux Kernel Module Programming Guide](https://sysprog21.github.io/lkmpg/) - 经典的内核模块编程指南
-- [Documentation/kbuild/modules.rst](third_party/linux-imx/Documentation/kbuild/modules.rst) - kbuild模块构建文档
-- [include/linux/module.h](third_party/linux-imx/include/linux/module.h) - 模块相关定义
-- [include/linux/init.h](third_party/linux-imx/include/linux/init.h) - 初始化相关宏
+- Documentation/kbuild/modules.rst - kbuild模块构建文档
+- include/linux/module.h - 模块相关定义
+- include/linux/init.h - 初始化相关宏

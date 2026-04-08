@@ -2,20 +2,20 @@
 
 > **最后更新**：2026-04-06
 > **当前版本**：v0.5
-> **查看详情**：[roadmap.md](roadmap.md)
+> **查看详情**：[roadmap.md](roadmap)
 
 ---
 
 ## 📑 快速导航
 
-- 🗺️ **总体路线图**：[roadmap.md](roadmap.md)
+- 🗺️ **总体路线图**：[roadmap.md](roadmap)
 - 📁 **发展方向**：
-  - [D1: 环境完善](directions/d1-environment.md) - 开发环境搭建
-  - [D2: 工具完备](directions/d2-tools.md) - 提升开发效率
-  - [D3: 示例展示](directions/d3-examples.md) - 展示项目能力
-  - [D4: 生态成熟](directions/d4-ecosystem.md) - 建设完整生态
+  - [D1: 环境完善](directions/d1-environment) - 开发环境搭建
+  - [D2: 工具完备](directions/d2-tools) - 提升开发效率
+  - [D3: 示例展示](directions/d3-examples) - 展示项目能力
+  - [D4: 生态成熟](directions/d4-ecosystem) - 建设完整生态
 - 🎯 **示例项目**：[projects/](projects/)
-- 📦 **已完成**：[archive/v0.5-milestone.md](archive/v0.5-milestone.md)
+- 📦 **已完成**：[archive/v0.5-milestone.md](archive/v0.5-milestone)
 
 ---
 
@@ -25,10 +25,10 @@
 
 ### 如何选择方向？
 
-**新用户**：从 [D1: 环境完善](directions/d1-environment.md) 开始
-**追求效率**：专注于 [D2: 工具完备](directions/d2-tools.md)
-**展示能力**：跳到 [D3: 示例展示](directions/d3-examples.md)
-**深度参与**：致力于 [D4: 生态成熟](directions/d4-ecosystem.md)
+**新用户**：从 [D1: 环境完善](directions/d1-environment) 开始
+**追求效率**：专注于 [D2: 工具完备](directions/d2-tools)
+**展示能力**：跳到 [D3: 示例展示](directions/d3-examples)
+**深度参与**：致力于 [D4: 生态成熟](directions/d4-ecosystem)
 
 ---
 
@@ -59,7 +59,7 @@
 - [x] **WSL2 Mirrored 网络模式**：Windows 用户无缝使用
 - [x] **完整教程体系**：30+ 篇教程，覆盖完整学习路径
 
-**详细记录**：参见 [v0.5 归档](archive/v0.5-milestone.md)
+**详细记录**：参见 [v0.5 归档](archive/v0.5-milestone)
 
 ---
 
@@ -69,8 +69,8 @@
 
 | 项目 ID | 项目名称 | 所属方向 | 详情 |
 |---------|----------|----------|------|
-| PROJ-001 | 便携式环境监测站 | D3 | [查看](projects/proj-001-env-monitor.md) |
-| PROJ-002 | 嵌入式图像分析仪 | D3 | [查看](projects/proj-002-image-analyzer.md) |
+| PROJ-001 | 便携式环境监测站 | D3 | [查看](projects/proj-001-env-monitor) |
+| PROJ-002 | 嵌入式图像分析仪 | D3 | [查看](projects/proj-002-image-analyzer) |
 
 ### 🥈 精品项目（技术深度）
 
@@ -98,7 +98,7 @@
 document/todo/
 ├── roadmap.md             # 总体路线图（从这里开始！）
 ├── todo.md                # 本文件：任务总览
-├── project.md             # 原项目清单（已整合到 projects/）
+├── projects/              # 示例项目详情
 ├── directions/            # 发展方向
 │   ├── d1-environment.md  # D1: 环境完善
 │   ├── d2-tools.md        # D2: 工具完备
@@ -115,9 +115,8 @@ document/todo/
 
 ## 🔗 相关链接
 
-- **项目主页**：[README.md](../../README.md)
-- **快速开始**：[QUICK_START.md](../../QUICK_START.md)
-- **教程目录**：[document/tutorial/](../tutorial/)
+- **快速开始**：[../QUICK_START](../QUICK_START)
+- **教程目录**：[../tutorial/](../tutorial/)
 - **GitHub Issues**：[提交问题](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/issues)
 
 ---
@@ -126,16 +125,16 @@ document/todo/
 
 我们欢迎所有形式的贡献！
 
-1. 查看 [roadmap.md](roadmap.md) 了解项目规划
+1. 查看 [roadmap.md](roadmap) 了解项目规划
 2. 根据你的兴趣选择一个方向
 3. 在该方向中选择合适的任务
 4. 在 GitHub Issues 中声明你的意图
 5. 提交 Pull Request
 
-详见：[CONTRIBUTING.md](../../CONTRIBUTING.md)
+详见：GitHub 仓库的贡献指南
 
 ---
 
 **让嵌入式 Linux 开发变得简单！** 🚀
 
-> 💡 **提示**：新用户建议先阅读 [roadmap.md](roadmap.md) 了解项目全貌，然后根据兴趣选择合适的发展方向。
+> 💡 **提示**：新用户建议先阅读 [roadmap.md](roadmap) 了解项目全貌，然后根据兴趣选择合适的发展方向。

@@ -6,28 +6,28 @@
 
 | 文件 | 标题 | 说明 |
 |------|------|------|
-| [01_why_mainline.md](01_why_mainline.md) | 为什么要折腾主线内核 | NXP BSP vs 主线内核的根本差异 |
-| [02_env_setup.md](02_env_setup.md) | 从零开始搭建编译环境 | 依赖安装、工具链配置 |
-| [03_source_fetch.md](03_source_fetch.md) | 获取主线内核源码 | kernel.org 克隆、补丁应用 |
-| [04_bsp_vs_mainline.md](04_bsp_vs_mainline.md) | BSP vs 主线深度对比 | DRM 显示子系统、设备树 binding 变化 |
-| [05_defconfig.md](05_defconfig.md) | 主线内核配置 | defconfig 配置、关键选项说明 |
-| [06_dts_migration.md](06_dts_migration.md) | 设备树迁移 | OF graph 连接、sim2 节点补充 |
-| [07_display_drm.md](07_display_drm.md) | DRM 显示系统移植 | LCD 驱动完整迁移指南 |
-| [08_touch_gt9xx.md](08_touch_gt9xx.md) | 触摸屏移植 | GT9147/Goodix 驱动配置 |
-| [09_network_dual_phy.md](09_network_dual_phy.md) | 双网口移植 | FEC + KSZ8081 以太网配置 |
-| [10_debug_tricks.md](10_debug_tricks.md) | 调试技巧 | dmesg 分析、设备树验证、DRM 调试 |
-| [11_common_issues.md](11_common_issues.md) | 常见问题 | 报错速查表、GPIO 冲突解决 |
+| [01_why_mainline.md](01_why_mainline) | 为什么要折腾主线内核 | NXP BSP vs 主线内核的根本差异 |
+| [02_env_setup.md](02_env_setup) | 从零开始搭建编译环境 | 依赖安装、工具链配置 |
+| [03_source_fetch.md](03_source_fetch) | 获取主线内核源码 | kernel.org 克隆、补丁应用 |
+| [04_bsp_vs_mainline.md](04_bsp_vs_mainline) | BSP vs 主线深度对比 | DRM 显示子系统、设备树 binding 变化 |
+| [05_defconfig.md](05_defconfig) | 主线内核配置 | defconfig 配置、关键选项说明 |
+| [06_dts_migration.md](06_dts_migration) | 设备树迁移 | OF graph 连接、sim2 节点补充 |
+| [07_display_drm.md](07_display_drm) | DRM 显示系统移植 | LCD 驱动完整迁移指南 |
+| [08_touch_gt9xx.md](08_touch_gt9xx) | 触摸屏移植 | GT9147/Goodix 驱动配置 |
+| [09_network_dual_phy.md](09_network_dual_phy) | 双网口移植 | FEC + KSZ8081 以太网配置 |
+| [10_debug_tricks.md](10_debug_tricks) | 调试技巧 | dmesg 分析、设备树验证、DRM 调试 |
+| [11_common_issues.md](11_common_issues) | 常见问题 | 报错速查表、GPIO 冲突解决 |
 
 ## 快速开始
 
-1. 阅读 [01_why_mainline.md](01_why_mainline.md) 了解主线内核的优势和代价
-2. 跟随 [02_env_setup.md](02_env_setup.md) 搭建编译环境
-3. 参考 [03_source_fetch.md](03_source_fetch.md) 获取主线源码并应用补丁
-4. 学习 [04_bsp_vs_mainline.md](04_bsp_vs_mainline.md) 理解架构差异
-5. 按 [05_defconfig.md](05_defconfig.md) 和 [06_dts_migration.md](06_dts_migration.md) 配置内核和设备树
-6. 参考 [07_display_drm.md](07_display_drm.md)、[08_touch_gt9xx.md](08_touch_gt9xx.md)、[09_network_dual_phy.md](09_network_dual_phy.md) 移植具体外设
-7. 使用 [10_debug_tricks.md](10_debug_tricks.md) 调试问题
-8. 查阅 [11_common_issues.md](11_common_issues.md) 解决常见报错
+1. 阅读 [01_why_mainline.md](01_why_mainline) 了解主线内核的优势和代价
+2. 跟随 [02_env_setup.md](02_env_setup) 搭建编译环境
+3. 参考 [03_source_fetch.md](03_source_fetch) 获取主线源码并应用补丁
+4. 学习 [04_bsp_vs_mainline.md](04_bsp_vs_mainline) 理解架构差异
+5. 按 [05_defconfig.md](05_defconfig) 和 [06_dts_migration.md](06_dts_migration) 配置内核和设备树
+6. 参考 [07_display_drm.md](07_display_drm)、[08_touch_gt9xx.md](08_touch_gt9xx)、[09_network_dual_phy.md](09_network_dual_phy) 移植具体外设
+7. 使用 [10_debug_tricks.md](10_debug_tricks) 调试问题
+8. 查阅 [11_common_issues.md](11_common_issues) 解决常见报错
 
 ## 技术要点
 

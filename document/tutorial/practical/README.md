@@ -8,7 +8,7 @@
 
 ### 第01章：实战项目概述
 
-**文件**: [01_practical_overview.md](01_practical_overview.md)
+**文件**: [01_practical_overview.md](01_practical_overview)
 
 本章介绍实战项目的整体框架和准备工作：
 - 实战项目的目标和预期结果
@@ -25,7 +25,7 @@
 
 ### 第02章：从零构建完整系统
 
-**文件**: [02_build_system.md](02_build_system.md)
+**文件**: [02_build_system.md](02_build_system)
 
 本章是实战教程的核心，串讲完整的构建流程：
 - 工具链验证
@@ -44,7 +44,7 @@
 
 ### 第03章：系统启动与调试
 
-**文件**: [03_boot_and_debug.md](03_boot_and_debug.md)
+**文件**: [03_boot_and_debug.md](03_boot_and_debug)
 
 本章是实战教程的收官之作，教你如何让系统跑起来并排查问题：
 - 系统启动前的准备

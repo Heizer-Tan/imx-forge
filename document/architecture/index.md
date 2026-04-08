@@ -8,9 +8,9 @@
 
 | 文档 | 描述 |
 |------|------|
-| **[系统架构](SYSTEM_ARCHITECTURE.md)** | 整体架构设计说明 |
-| **[构建系统](BUILD_SYSTEM.md)** | 构建脚本详解 |
-| **[补丁系统](PATCH_SYSTEM.md)** | 双轨补丁管理 |
+| **[系统架构](SYSTEM_ARCHITECTURE)** | 整体架构设计说明 |
+| **[构建系统](BUILD_SYSTEM)** | 构建脚本详解 |
+| **[补丁系统](PATCH_SYSTEM)** | 双轨补丁管理 |
 
 ---
 

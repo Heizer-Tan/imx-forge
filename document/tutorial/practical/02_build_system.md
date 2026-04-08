@@ -72,19 +72,19 @@ file /tmp/test_arm
 
 在开始本章之前，建议你已经阅读或了解：
 
-1. **工具链教程** ([../start/01_start_from_toolchain.md](../start/01_start_from_toolchain.md))
+1. **工具链教程** ([../start/01_start_from_toolchain.md](../start/01_start_from_toolchain))
    - 交叉编译的原理
    - ARM GNU Toolchain 的安装和验证
 
-2. **U-Boot 教程** ([../uboot/01_what_is_uboot.md](../uboot/01_what_is_uboot.md))
+2. **U-Boot 教程** ([../uboot/01_what_is_uboot.md](../uboot/01_what_is_uboot))
    - U-Boot 在启动链条中的作用
    - U-Boot 的基本概念和命令
 
-3. **Linux 内核教程** ([../kernel/01_kernel_overview.md](../kernel/01_kernel_overview.md))
+3. **Linux 内核教程** ([../kernel/01_kernel_overview.md](../kernel/01_kernel_overview))
    - 内核的基本概念
    - 主线内核与厂商BSP的区别
 
-4. **Rootfs 教程** ([../rootfs/01_rootfs_overview.md](../rootfs/01_rootfs_overview.md))
+4. **Rootfs 教程** ([../rootfs/01_rootfs_overview.md](../rootfs/01_rootfs_overview))
    - Rootfs 的作用和组成
    - BusyBox 的基本概念
 
@@ -95,8 +95,8 @@ file /tmp/test_arm
 ## 第二步：U-Boot 编译——系统的第一道门
 
 > **知识点回顾**：如果你对 U-Boot 的作用、编译原理还不够熟悉，建议先阅读：
-> - [01_what_is_uboot.md](../uboot/01_what_is_uboot.md) - U-Boot 是什么
-> - [02_uboot_compile.md](../uboot/02_uboot_compile.md) - U-Boot 编译详解
+> - [01_what_is_uboot.md](../uboot/01_what_is_uboot) - U-Boot 是什么
+> - [02_uboot_compile.md](../uboot/02_uboot_compile) - U-Boot 编译详解
 >
 > 本实战教程将使用项目提供的构建脚本简化流程，但理解背后的原理仍然重要。
 
