@@ -155,7 +155,12 @@ check_kernel_built() {
         log_error ""
         log_error "   2. 或者使用快速编译（仅生成必要文件）："
         log_error "      cd $kdir"
-        log_error "      make O=$kobj ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE modules_prepare"
+        log_error "      make O=$kobj ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE vmlinux -j\$(nproc)"
+        log_error ""
+        log_error "📌 重要说明"
+        log_error "   你需要确保："
+        log_error "   1.1 至少编译过一次 vmlinux（或完整内核），以生成 Module.symvers"
+        log_error "   1.2. ln -s vmlinux.symvers $kobj/Module.symvers"
         log_error ""
         log_error "========================================"
         return 1
