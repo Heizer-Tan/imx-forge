@@ -293,10 +293,10 @@
 
 ## 🔗 相关资源
 
-- **主路线图**：[roadmap.md](../roadmap)
-- **D1 详情**：[d1-environment.md](./d1-environment)
-- **D2 详情**：[d2-tools.md](./d2-tools)
-- **D3 详情**：[d3-examples.md](./d3-examples)
+- **主路线图**：[roadmap.md](../roadmap.md)
+- **D1 详情**：[d1-environment.md](./d1-environment.md)
+- **D2 详情**：[d2-tools.md](./d2-tools.md)
+- **D3 详情**：[d3-examples.md](./d3-examples.md)
 
 ---
 

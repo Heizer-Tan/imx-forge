@@ -252,7 +252,7 @@
 
 ## 🔗 相关资源
 
-- **主路线图**：[roadmap.md](../roadmap)
+- **主路线图**：[roadmap.md](../roadmap.md)
 - **快速开始**：QUICK_START.md
 
 ---

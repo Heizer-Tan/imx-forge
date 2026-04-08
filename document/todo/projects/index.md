@@ -10,8 +10,8 @@ IMX-Forge 项目的示例项目展示。
 
 | 项目 ID | 项目名称 | 详情 |
 |---------|----------|------|
-| [PROJ-001](proj-001-env-monitor) | 便携式环境监测站 | IoT 完整方案 |
-| [PROJ-002](proj-002-image-analyzer) | 嵌入式图像分析仪 | OpenCV 图像处理 |
+| [PROJ-001](proj-001-env-monitor.md) | 便携式环境监测站 | IoT 完整方案 |
+| [PROJ-002](proj-002-image-analyzer.md) | 嵌入式图像分析仪 | OpenCV 图像处理 |
 
 ---
 
