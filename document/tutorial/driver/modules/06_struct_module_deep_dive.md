@@ -1480,7 +1480,7 @@ static void __exit my_module_exit(void)
 ### 延伸阅读
 
 - [Linux内核模块编程指南](https://sysprog21.github.io/lkmpg/)
-- [内核文档：kbuild/modules.rst](third_party/linux-imx/Documentation/kbuild/modules.rst)
+- 内核文档：kbuild/modules.rst
 - [Understanding the Linux Kernel](https://www.oreilly.com/library/view/understanding-the-linux/0596005652/)
 
 ---

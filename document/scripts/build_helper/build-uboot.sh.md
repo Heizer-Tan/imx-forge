@@ -151,8 +151,8 @@ libssl-dev, libgnutls28-dev, libncurses-dev
 **详细的依赖检查逻辑**：
 
 请参考以下文档：
-- [env-init.sh 源码](../../init/env-init.sh)
-- [环境初始化指南](../../tutorial/start/02_env_init_guide.md)
+- env-init.sh 源码
+- 环境初始化指南
 
 #### check_toolchain()
 
@@ -621,7 +621,7 @@ DEFAULT_DEVICE_TREE="imx6ull-my-board"
 
 ## 相关文档
 
-- [U-Boot编译教程](../../tutorial/uboot/02_uboot_compile.md) - U-Boot 编译的详细原理
-- [板级配置基础](../../tutorial/uboot/04_board_config_basic.md) - U-Boot 板级配置
-- [Linux内核构建脚本](build-linux.sh.md) - 对比的 Linux 内核构建脚本
+- U-Boot编译教程 - U-Boot 编译的详细原理
+- 板级配置基础 - U-Boot 板级配置
+- [Linux内核构建脚本](./build-linux.sh) - 对比的 Linux 内核构建脚本
 - [Logo 处理](../logo_helper/) - Logo 生成工具文档

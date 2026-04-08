@@ -8,12 +8,12 @@
 
 | 章节 | 标题 | 内容 |
 |------|------|------|
-| 01 | [Rootfs 概述](01_rootfs_overview.md) | 根文件系统简介 |
-| 02 | [BusyBox 编译](02_busybox_compile.md) | BusyBox 配置与编译 |
-| 03 | [inittab 与 init](03_inittab_init.md) | 启动流程详解 |
-| 04 | [目录结构](04_rootfs_structure.md) | 文件系统布局 |
-| 05 | [NFS 挂载](05_nfs_wsl_troubleshoot.md) | 网络文件系统 |
-| 06 | [应用集成](06_apps_integration.md) | 添加自定义程序 |
+| 01 | [Rootfs 概述](01_rootfs_overview) | 根文件系统简介 |
+| 02 | [BusyBox 编译](02_busybox_compile) | BusyBox 配置与编译 |
+| 03 | [inittab 与 init](03_inittab_init) | 启动流程详解 |
+| 04 | [目录结构](04_rootfs_structure) | 文件系统布局 |
+| 05 | [NFS 挂载](05_nfs_wsl_troubleshoot) | 网络文件系统 |
+| 06 | [应用集成](06_apps_integration) | 添加自定义程序 |
 
 ---
 
@@ -47,11 +47,11 @@
 
 ## ➡️ 下一章
 
-完成 Rootfs 学习后，继续 **[驱动开发教程](../driver/)**。
+完成 Rootfs 学习后，继续 **驱动开发教程**。
 
 ---
 
 ## 🆘 相关资源
 
-- [NFS Rootfs 目录](../../rootfs/nfs/) —— 项目 Rootfs 参考
-- [Overlay 目录](../../rootfs/overlay/) —— 叠加层文件
+- NFS Rootfs 目录 —— 项目 Rootfs 参考
+- Overlay 目录 —— 叠加层文件

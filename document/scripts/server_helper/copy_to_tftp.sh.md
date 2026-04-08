@@ -1320,9 +1320,9 @@ rebuild
 
 ## 相关文档
 
-- [WSL2 + TFTP 网络启动踩坑记](../../tutorial/kernel/06_wsl_network_boot.md) - WSL2 环境下 TFTP 配置详解
-- [build-linux.sh](../build_helper/build-linux.sh.md) - 内核编译脚本
-- [logging.sh](../lib/logging.sh.md) - 日志工具库
+- WSL2 + TFTP 网络启动踩坑记 - WSL2 环境下 TFTP 配置详解
+- [build-linux.sh](../build_helper/build-linux.sh) - 内核编译脚本
+- [logging.sh](../lib/logging.sh) - 日志工具库
 
 ---
 

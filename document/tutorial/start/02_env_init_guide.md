@@ -147,7 +147,7 @@ Would you like to install these dependencies automatically? (y/n): y
 
 ## 相关文件
 
-- [env-init.sh](../../scripts/init/env-init.sh) - 依赖检查脚本
-- [build-uboot.sh](../../scripts/build_helper/build-uboot.sh) - U-Boot 构建脚本
-- [build-linux.sh](../../scripts/build_helper/build-linux.sh) - Linux 内核构建脚本
-- [build-busybox.sh](../../scripts/build_helper/build-busybox.sh) - BusyBox 构建脚本
+- env-init.sh - 依赖检查脚本
+- build-uboot.sh - U-Boot 构建脚本
+- build-linux.sh - Linux 内核构建脚本
+- build-busybox.sh - BusyBox 构建脚本

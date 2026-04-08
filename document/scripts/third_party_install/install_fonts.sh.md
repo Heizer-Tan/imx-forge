@@ -955,6 +955,6 @@ main() {
 
 ## 相关文档
 
-- [qt_fonts_env.sh](config/qt/qt_fonts_env.sh.md) - Qt 字体环境变量配置脚本
-- [install_qt_with_compile.sh](install_qt_with_compile.sh.md) - 调用此脚本的 Qt 编译脚本
-- [Qt 字体配置](../../../tutorial/qt/font_configuration.md) - Qt 字体使用教程
+- [qt_fonts_env.sh](config/qt/qt_fonts_env.sh) - Qt 字体环境变量配置脚本
+- [install_qt_with_compile.sh](install_qt_with_compile.sh) - 调用此脚本的 Qt 编译脚本
+- Qt 字体配置 - Qt 字体使用教程

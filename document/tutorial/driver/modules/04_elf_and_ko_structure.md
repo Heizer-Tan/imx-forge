@@ -883,4 +883,4 @@ cat /sys/kernel/debug/tracing/trace_pipe
 
 - [ELF格式规范](https://refspecs.linuxfoundation.org/elf/elf.pdf) - TIS ELF Specification
 - [Linux内核模块编程指南](https://sysprog21.github.io/lkmpg/) - The Linux Kernel Module Programming Guide
-- [内核文档：kbuild/modules.rst](third_party/linux-imx/Documentation/kbuild/modules.rst) - 外部模块构建文档
+- 内核文档：kbuild/modules.rst - 外部模块构建文档

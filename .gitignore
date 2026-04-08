@@ -6,6 +6,9 @@ host/
 
 .claude
 
+# Local Sites debugs
+.venv/
+
 # Kernel module build artifacts
 *.o
 *.ko

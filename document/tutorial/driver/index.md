@@ -8,9 +8,9 @@ Linux 驱动开发是嵌入式开发的高级技能。
 
 | 章节 | 目录 | 内容 |
 |------|------|------|
-| 基础驱动 | [1_start_from_basic/](1_start_from_basic/) | 从零开始写驱动 |
+| 基础驱动 | `1_start_from_basic/` | 从零开始写驱动（待完成） |
 | 模块开发 | [modules/](modules/) | 内核模块编程 |
-| 固件应用 | [firmware_apply/](firmware_apply/firmware.md) | 固件加载 |
+| 固件应用 | [firmware_apply/](firmware_apply/) | 固件加载 |
 
 ---
 
@@ -42,5 +42,5 @@ Linux 驱动开发是嵌入式开发的高级技能。
 
 ## 🆘 相关资源
 
-- [驱动示例](../../../driver/base_driver/) —— 项目驱动框架
-- [LED 驱动](../../../driver/led/) —— 简单驱动示例
+- 驱动示例 —— 项目驱动框架
+- LED 驱动 —— 简单驱动示例

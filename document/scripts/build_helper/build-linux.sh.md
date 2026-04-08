@@ -139,8 +139,8 @@ check_linux_dependencies || exit 1
 **详细的依赖检查逻辑**：
 
 请参考以下文档：
-- [env-init.sh 源码](../../init/env-init.sh)
-- [环境初始化指南](../../tutorial/start/02_env_init_guide.md)
+- env-init.sh 源码
+- 环境初始化指南
 
 #### check_toolchain()
 
@@ -594,6 +594,6 @@ do_build() {
 
 ## 相关文档
 
-- [Linux内核编译教程](../../tutorial/kernel/02_kernel_compile.md) - 内核编译的详细原理
-- [内核配置详解](../../tutorial/kernel/03_kernel_config.md) - defconfig 和 .config 的关系
-- [U-Boot构建脚本](build-uboot.sh.md) - 对比的 U-Boot 构建脚本
+- Linux内核编译教程 - 内核编译的详细原理
+- 内核配置详解 - defconfig 和 .config 的关系
+- [U-Boot构建脚本](./build-uboot.sh) - 对比的 U-Boot 构建脚本

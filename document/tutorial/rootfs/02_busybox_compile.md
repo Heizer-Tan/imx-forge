@@ -514,4 +514,4 @@ Examples:
 
 下一章，我们将深入 Linux 系统的"第一进程"——init，理解它是如何工作的，以及如何配置 inittab 让系统顺利启动。
 
-**下一章：[inittab 与 init 系统](./03_inittab_init.md)**
+**下一章：[inittab 与 init 系统](./03_inittab_init)**

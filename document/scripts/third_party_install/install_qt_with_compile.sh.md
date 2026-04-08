@@ -732,9 +732,9 @@ ROOTFS_DIR=rootfs/nfs ./scripts/third_party_install/install_fonts.sh
 
 ## 相关文档
 
-- [Qt6 编译教程](../../tutorial/practical/06_qt_cross_compile.md) - Qt 交叉编译原理
-- [Rootfs 概述](../../tutorial/rootfs/01_rootfs_overview.md) - 根文件系统介绍
-- [install_fonts.sh](../third_party_install/config/qt/qt_fonts_env.sh.md) - 字体安装脚本
+- Qt6 编译教程 - Qt 交叉编译原理
+- Rootfs 概述 - 根文件系统介绍
+- install_fonts.sh - 字体安装脚本
 - [Qt6 官方文档](https://doc.qt.io/qt-6/embedded-linux.html) - Qt 嵌入式 Linux 指南
 - [qt-compile-pipeline](https://github.com/your-org/qt-compile-pipeline) - 编译管道项目
 

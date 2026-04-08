@@ -198,4 +198,4 @@ Rootfs 是嵌入式 Linux 系统不可或缺的一部分，但往往被初学者
 
 准备好了吗？我们开始动手吧！
 
-**下一章：[BusyBox 编译安装](./02_busybox_compile.md)**
+**下一章：[BusyBox 编译安装](./02_busybox_compile)**
