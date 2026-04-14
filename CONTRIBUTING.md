@@ -57,9 +57,54 @@
 
 ### 依赖安装
 
-请参考README.md！已经有很详细的描述了！
+我们推荐使用 Docker 开发环境进行贡献，确保环境一致性：
+
+#### 方式一：Docker 开发环境（推荐）
+
+**优点**：
+- ✅ 环境统一，避免"在我机器上能跑"问题
+- ✅ 开箱即用，无需配置工具链和依赖
+- ✅ 适合团队协作
+
+**快速开始**：
+
+```bash
+# 1. 构建 Docker 镜像
+cd docker
+DOCKER_BUILDKIT=1 docker build -t imx-forge:latest .
+cd ..
+
+# 2. 运行容器
+docker run -it --rm -v $(pwd):/workspace imx-forge:latest
+
+# 3. 在容器内开发
+# （所有工具链和依赖已预装）
+```
+
+**详细文档**：
+- [Docker 开发环境](docker/README.md)
+- [Docker 教程](document/tutorial/docker)
+
+#### 方式二：主机环境
+
+如果您希望在主机上直接开发，请参考：
+- [README.md - 5分钟快速体验](README.md#-5分钟快速体验)
+- [QUICK_START.md](document/QUICK_START.md)
 
 ### 快速验证
+
+**Docker 环境**：
+
+```bash
+# 运行容器并验证
+docker run -it --rm -v $(pwd):/workspace imx-forge:latest
+
+# 在容器内执行
+cd /workspace
+./scripts/release-all.sh
+```
+
+**主机环境**：
 
 ```bash
 cd /path/to/imx-forge

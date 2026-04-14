@@ -13,6 +13,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/Awesome-Embedded-Learning-Studio/imx-forge?style=flat-square)](#-贡献者)
+[![Docker](https://img.shields.io/badge/Docker-supported%20%EF%83%8B-blue?style=flat-square)](docker/README.md)
 [![WSL2](https://img.shields.io/badge/WSL2-Tested%20%26%20OK-brightgreen?style=flat-square)](#-wsl2-深度友好)
 [![Kernel](https://img.shields.io/badge/Kernel-dual%20track%20(6.12.3%20%2B%20mainline%207.0rc)-blue?style=flat-square)](#-双轨内核策略)
 [![Mainline](https://img.shields.io/badge/Mainline-migrated%20%EF%83%A0-brightgreen?style=flat-square)](#-双轨内核策略)
@@ -25,6 +26,20 @@
 ---
 
 ## ✨ 为什么选择 IMX-Forge？
+
+### 🐳 Docker 开发环境
+
+> **新手友好！** 5分钟配置完成，开箱即用的完整开发环境
+
+- ✅ 预装 ARM GNU Toolchain 15.2.rel1 和所有依赖
+- ✅ 无需配置工具链 PATH，无需担心版本冲突
+- ✅ 国内优化版本（Dockerfile.cn）加速下载
+- ✅ 支持烧录和网络启动（USB/NFS）
+- ✅ 跨平台支持（Linux/Windows/macOS + WSL2）
+
+**快速开始**: 见下方 "🚀 5分钟快速体验" Docker 部分
+**详细文档**: [Docker 开发环境指南](docker/README.md)
+**Windows 用户**: [WSL2 + Docker 配置指南](document/tutorial/docker/01_docker_basics.md#wsl2-安装) ⭐
 
 ### 📚 完整的教程链条
 
@@ -91,32 +106,66 @@ IMX-Forge/
 
 ## 🚀 5分钟快速体验
 
+### 方式一：Docker 开发环境（推荐 ⭐）
+
 ```bash
 # 1. 克隆项目（含子模块）
 git clone --recurse-submodules https://github.com/Awesome-Embedded-Learning-Studio/imx-forge.git
 cd imx-forge
 
-# 2. 安装依赖（Ubuntu/WSL2）
-sudo apt install -y build-essential gcc make bison flex device-tree-compiler \
-    libssl-dev libncurses-dev python3-pyelftools swig picocom imagemagick cmake ninja-build meson libts-dev libpulse-dev libasound2-dev
-# 3. 安装 ARM 工具链（ARM GNU Toolchain 15.2）
-wget https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
-tar -xf arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
-sudo mv arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-linux-gnueabihf /opt/arm-gnu-toolchain
-export PATH=/opt/arm-gnu-toolchain/bin:$PATH
+# 2. 构建 Docker 镜像（国内用户使用 Dockerfile.cn）
+cd docker
+DOCKER_BUILDKIT=1 docker build -t imx-forge:latest .
+cd ..
 
-# 4. 一键构建（推荐）或分步构建
-./scripts/release-all.sh                      # 一键构建所有组件（NXP BSP 内核）
-# 或分步构建：
-# ./scripts/build_helper/build-uboot.sh
-# ./scripts/build_helper/build-linux.sh       # NXP BSP 内核
-# ./scripts/build_helper/build-mainline-linux.sh  # 主线内核
-# ./scripts/build_helper/build-busybox.sh
+# 3. 运行容器并开始编译
+docker run -it --rm -v $(pwd):/workspace imx-forge:latest
 
-# 5. 烧录到 SD 卡，启动！
+# 在容器内执行
+./scripts/release-all.sh  # 一键构建所有组件
 ```
 
-> 📖 **详细指南**: [QUICK_START.md](QUICK_START.md)
+**详细文档**: [Docker 开发环境](docker/README.md)
+
+---
+
+### 方式二：主机开发环境
+
+如果您希望在主机上直接开发，请参考 [QUICK_START.md](QUICK_START.md)。
+
+---
+
+### 💡 Windows 用户特别说明
+
+IMX-Forge 对 Windows + WSL2 环境深度友好！
+
+**推荐配置**：
+- **WSL2 (Ubuntu 22.04/24.04)** + **Docker Desktop with WSL2 Integration**
+
+**优势**：
+- ✅ 无需双系统，Windows 下原生开发
+- ✅ 完整的 Linux 工具链支持
+- ✅ Docker 与 WSL2 无缝集成
+- ✅ 支持 USB 设备直通（烧录、串口调试）
+- ✅ Mirrored 网络模式直接访问开发板
+
+**快速配置**：
+```powershell
+# 1. 安装 WSL2
+wsl --install
+
+# 2. 配置网络模式
+notepad $env:USERPROFILE\.wslconfig
+# 添加：networkingMode=mirrored
+
+# 3. 重启 WSL
+wsl --shutdown
+
+# 4. 安装 Docker Desktop 并启用 WSL2 集成
+#    Settings → Resources → WSL Integration
+```
+
+**详细教程**：[Docker 教程 - WSL2 安装](document/tutorial/docker/01_docker_basics.md#wsl2-安装)
 
 ---
 
@@ -124,6 +173,7 @@ export PATH=/opt/arm-gnu-toolchain/bin:$PATH
 
 | 阶段 | 教程 | 内容 |
 |------|------|------|
+| 0️⃣ | [Docker 教程](document/tutorial/docker) | Docker 基础知识与 IMX-Forge Docker 开发指南 |
 | 1️⃣ | [工具链教程](document/tutorial/start/01_start_from_toolchain.md) | ARM GNU Toolchain 15.2 安装与配置 |
 | 2️⃣ | [U-Boot 教程](document/tutorial/uboot/01_what_is_uboot.md) | U-Boot 原理、编译、移植、Logo 定制 |
 | 3️⃣ | [内核教程](document/tutorial/kernel) | 设备树、内核配置、驱动开发 |
@@ -148,8 +198,9 @@ export PATH=/opt/arm-gnu-toolchain/bin:$PATH
 
 | 环境 | 状态 | 备注 |
 |------|------|------|
-| **WSL2 (Ubuntu 22.04/24.04)** | ✅ 推荐 | Windows 用户首选，需 Mirrored 网络模式 |
-| Ubuntu 24.04+ | ✅ 推荐 | 原生 Linux 环境 |
+| **Docker** | ✅ 推荐 | 跨平台，开箱即用，详见 [docker/README.md](docker/README.md) |
+| **WSL2 (Ubuntu 22.04/24.04)** | ✅ 支持 | Windows 用户，需 Mirrored 网络模式 |
+| Ubuntu 24.04+ | ✅ 支持 | 原生 Linux 环境 |
 
 ### 双轨内核演进路线
 

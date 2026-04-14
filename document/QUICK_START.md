@@ -16,6 +16,23 @@
 
 ---
 
+## 开发方式选择
+
+在开始之前，请选择适合您的开发方式：
+
+| 开发方式 | 推荐人群 | 优点 | 缺点 |
+|---------|---------|------|------|
+| **Docker 环境** | 新手、Windows 用户、国内用户 | • 5分钟快速开始<br>• 环境统一无依赖问题<br>• 跨平台支持<br>• 国内优化加速 | • 需要安装 Docker<br>• 需要熟悉基本 Docker 命令 |
+| **主机环境** | Linux 用户、高级开发者 | • 直接访问硬件<br>• 性能略优<br>• 更灵活的调试 | • 工具链配置复杂<br>• 可能遇到依赖冲突<br>• 国内下载较慢 |
+
+**推荐**: 新手和国内用户优先选择 Docker 环境。
+
+**如何使用本指南**:
+- **Docker 用户**: 请跳转到 [Docker 快速开始](#docker-快速开始)
+- **主机环境用户**: 请继续阅读 [环境准备](#环境准备) 章节
+
+---
+
 ## 项目概述
 
 ### IMX-Forge 是什么
@@ -69,6 +86,109 @@ patches/
 - **自制板移植者** —— 需要参考成熟的设备树和补丁配置
 - **学习者** —— 想理解完整的嵌入式 Linux 启动链条
 - **QT 应用开发者** —— 需要 QT6 交叉编译环境和触摸屏支持
+
+---
+
+## Docker 快速开始
+
+> 本章节适合使用 Docker 开发环境的用户。如果您选择主机环境开发，请跳过本章节。
+
+### 前置要求
+
+- **Docker**: 20.10+ (安装指南: https://docs.docker.com/get-docker/)
+- **磁盘空间**: 至少 5GB 可用空间
+- **内存**: 建议 4GB 以上可用内存
+
+### 国内用户优化
+
+如果您在中国大陆，建议先配置 Docker 镜像加速器：
+
+```bash
+cd docker
+sudo bash setup-mirror.sh  # 一键配置国内镜像源
+```
+
+### 构建 Docker 镜像
+
+```bash
+# 进入项目目录
+cd /path/to/imx-forge/docker
+
+# 国内用户使用优化的 Dockerfile
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.cn -t imx-forge:latest .
+
+# 国际用户使用标准 Dockerfile
+DOCKER_BUILDKIT=1 docker build -t imx-forge:latest .
+```
+
+构建时间约 5-10 分钟（取决于网络速度）。
+
+### 运行容器
+
+```bash
+# 返回项目根目录
+cd ..
+
+# 运行容器（挂载项目目录）
+docker run -it --rm \
+    -v $(pwd):/workspace \
+    -w /workspace \
+    imx-forge:latest
+```
+
+如果需要使用 USB 设备（烧录）：
+
+```bash
+docker run -it --rm \
+    --privileged \
+    -v /dev:/dev \
+    -v $(pwd):/workspace \
+    -w /workspace \
+    imx-forge:latest
+```
+
+### 验证环境
+
+进入容器后，验证工具链：
+
+```bash
+arm-none-linux-gnueabihf-gcc --version
+```
+
+预期输出：
+```
+arm-none-linux-gnueabihf-gcc (GNU Toolchain for the Arm Architecture 15.2.Rel1) 15.2.1 20250409
+```
+
+### 开始编译
+
+在容器内执行：
+
+```bash
+# 一键构建所有组件
+./scripts/release-all.sh
+
+# 或分步构建
+./scripts/build_helper/build-uboot.sh
+./scripts/build_helper/build-linux.sh
+./scripts/build_helper/build-busybox.sh
+```
+
+### 输出文件
+
+编译产物在 `out/` 目录，与主机环境相同。容器退出后文件仍保留在主机上。
+
+### 下一步
+
+Docker 用户可以直接跳转到 [快速构建](#快速构建) 章节，构建流程与主机环境完全相同。
+
+### 常见问题
+
+- **Q: 镜像构建失败？** 检查网络连接，国内用户使用 Dockerfile.cn
+- **Q: 容器内无法访问 USB？** 使用 `--privileged -v /dev:/dev` 参数
+- **Q: 编译产物权限问题？** Docker 容器使用 ubuntu 用户(UID 1000)，如有问题请查看 [docker/README.md](../docker/README.md)
+
+详细文档请参考 [docker/README.md](../docker/README.md)。
 
 ---
 
@@ -219,6 +339,8 @@ imx-forge/
 ├── tools/                  # 辅助工具
 └── document/               # 文档和教程
 ```
+
+> **Docker 用户注意**: Docker 镜像已包含工具链，无需手动安装 ARM GNU Toolchain。但项目仍需要克隆子模块以获取 U-Boot、Linux 内核等源码。
 
 ---
 
