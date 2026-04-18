@@ -105,7 +105,7 @@ list_drivers() {
         if [[ -d "$driver_dir" ]]; then
             local driver=$(basename "$driver_dir")
             # 跳过非驱动目录
-            if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]]; then
+            if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
                 continue
             fi
 
@@ -353,7 +353,7 @@ case $ACTION in
                 if [[ -d "$driver_dir" ]]; then
                     driver=$(basename "$driver_dir")
                     # 跳过非驱动目录
-                    if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]]; then
+                    if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
                         continue
                     fi
 
@@ -386,7 +386,7 @@ case $ACTION in
                 if [[ -d "$driver_dir" ]]; then
                     driver=$(basename "$driver_dir")
                     # 跳过非驱动目录
-                    if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]]; then
+                    if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
                         continue
                     fi
 

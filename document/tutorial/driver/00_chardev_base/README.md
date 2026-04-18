@@ -60,61 +60,114 @@
    - 老API的优缺点分析
    - 为新API学习做铺垫
 
-7. **[07_legacy_chardev_led.md](07_legacy_chardev_led.md)** - 老API：LED硬件驱动 🔥
-   - 真实硬件操作：寄存器映射、时钟使能、GPIO配置
-   - 完整的LED驱动代码
-   - `ioremap`/`readl`/`writel` 实战应用
-   - **硬件驱动开发的完整流程**
+**📌 [06p_ide_setup.md](06p_ide_setup.md)** - IDE 配置指南 🛠️
+   - VSCode + clangd 环境搭建
+   - 内核 `compile_commands.json` 生成原理
+   - 项目配置说明
+   - 常见问题排查
 
-8. **[08_new_chardev_api.md](08_new_chardev_api.md)** - 新字符设备驱动API ⭐⭐⭐
-   - **核心技术文档**
-   - 新API原理（"三步走"：领号→填表→进门）
-   - `file_operations` 详细定义和使用
-   - 设备号管理（静态 vs 动态）
-   - `cdev` 结构体详解
-   - 自动创建设备节点（`class` + `device`）
-   - 新老API对比
-   - **必读章节，包含完整的新API讲解**
+7. **[07_hardware_overview.md](07_hardware_overview.md)** - 从虚拟设备到真实硬件：LED 硬件基础 🔥
+   - i.MX 6ULL LED 硬件连接与 GPIO 原理
+   - 引脚复用（IOMUX）机制详解
+   - 时钟树与 CCGR 寄存器
+   - **从虚拟设备到真实硬件的过渡**
 
-9. **[09_experiment_code.md](09_experiment_code.md)** - 虚拟设备实验（入门）💻
-   - 完整的虚拟设备驱动代码（chrdevbase）
-   - 测试程序代码
-   - 编译和运行步骤
-   - **无硬件要求，适合练习**
+8. **[08_memory_mapped_io.md](08_memory_mapped_io.md)** - 内存映射 I/O 深度解析 ⭐⭐⭐
+   - MMIO 与端口映射 I/O 的区别
+   - `ioremap()`/`iounmap()` 源码分析
+   - `writel()`/`readl()` 与内存屏障
+   - **必读章节，理解硬件访问机制**
 
-10. **[10_newchardev_experiment.md](10_newchardev_experiment.md)** - 新API实战实验（进阶）🔥
-    - 完整的新API LED驱动代码
-    - 设备结构体封装
-    - `private_data` 使用
-    - 自动创建设备节点验证
-    - **包含真实硬件故障排除案例**
+9. **[09_hardware_abstraction_layer.md](09_hardware_abstraction_layer.md)** - 硬件抽象层设计与实现 🔧
+   - 分层架构设计理念
+   - `led_hw.c` 完整实现解析
+   - 初始化流程详解（时钟、引脚复用、GPIO 配置）
+   - **工程化驱动设计**
 
-#### **阶段三：调试与参考**（11-12）
+10. **[10_chardev_implementation.md](10_chardev_implementation.md)** - 字符设备驱动实现 💻
+    - 文件操作接口（open/read/write/release）
+    - 用户空间与内核空间数据交互
+    - 与硬件抽象层的集成
+    - **完整的字符设备驱动代码**
 
-11. **[11_api_migration_guide.md](11_api_migration_guide.md)** - API 迁移指南
-    - 从老内核到新内核的迁移路径
-    - API 详细对比和迁移示例
-    - 常见问题和解决方案
+11. **[11_build_test_deploy.md](11_build_test_deploy.md)** - 构建、测试与部署实战 🚀
+    - Makefile 解析与交叉编译
+    - 模块加载与测试流程
+    - 常见问题排查技巧
+    - **从代码到运行的全流程**
 
-12. **[12_kernel_comparison.md](12_kernel_comparison.md)** - 内核特性对比
-    - linux-imx vs mainline 详细对比
-    - API 兼容性分析
-    - 选择建议和编译差异
-    - **参考文档，可在需要时查阅**
+#### **阶段三：新 API 专题（12-18）**
+
+12. **[12_new_chardev_api_overview.md](12_new_chardev_api_overview.md)** - 新 API 概览与设计理念 ⭐⭐⭐
+    - 新老 API 对比
+    - "三步走" 流程设计理念
+    - 资源霸占问题分析
+    - 自动创建设备节点机制
+    - **必读章节，理解新 API 的设计思想**
+
+13. **[13_cdev_and_device_number.md](13_cdev_and_device_number.md)** - cdev 结构体与设备号管理 ⭐⭐⭐
+    - `struct cdev` 完整定义和字段详解
+    - `cdev_init()`、`cdev_add()`、`cdev_del()` 详解
+    - `cdev_device_add()` 统一 API
+    - 设备号数据结构和宏（MKDEV/MAJOR/MINOR）
+    - 动态分配 vs 静态注册
+    - `/proc/devices` 查看
+
+14. **[14_class_device_model.md](14_class_device_model.md)** - class 和 device 模型 ⭐⭐⭐
+    - `struct class` 完整定义
+    - `class_create()` 签名变更（owner 参数移除）
+    - `device_create()` 和 `device_destroy()`
+    - dev_groups 和 sysfs 属性
+    - udev/mdev 自动创建节点机制
+    - 资源清理顺序
+
+15. **[15_error_handling_patterns.md](15_error_handling_patterns.md)** - 驱动错误处理模式 ⭐⭐
+    - 错误指针机制（ERR_PTR、PTR_ERR、IS_ERR）
+    - goto 错误处理模式
+    - 资源清理的逆序原则
+    - 常见错误码（-EINVAL、-EFAULT、-ENOMEM 等）
+    - 防御性编程技巧
+
+16. **[16_device_structure_in_new_api.md](16_device_structure_in_new_api.md)** - 新 API 中的设备结构体 ⭐⭐
+    - 为什么要封装设备结构体
+    - `struct IMXAesLED` 完整解析
+    - private_data 模式使用
+    - 单设备 vs 多设备场景
+    - 与 v1 驱动的对比
+
+17. **[17_new_api_driver_analysis.md](17_new_api_driver_analysis.md)** - 新 API 驱动代码深度解析 ⭐⭐⭐
+    - v2 驱动完整代码结构
+    - `init_led_handle()` 函数详解
+    - `release_led_handle()` 函数详解
+    - 新 API "三步走" 实际应用
+    - 与硬件抽象层的集成
+
+18. **[18_app_development_and_testing.md](18_app_development_and_testing.md)** - 应用开发与真实测试 ⭐⭐
+    - `led_control.c` 应用程序解析
+    - 参数验证和错误处理
+    - 真实测试输出分析
+    - GPIO 寄存器值变化
+    - 常见问题排查
+
+#### **阶段四：参考文档**
+
+- API 迁移指南和内核特性对比文档正在更新中，敬请期待...
 
 ### 🚀 快速路径（有经验开发者）
 
 如果你已经有内核开发经验：
 
-1. 直接阅读 **[08_new_chardev_api.md](08_new_chardev_api.md)** 了解新API
-2. 跟随 **[10_newchardev_experiment.md](10_newchardev_experiment.md)** 实践真实硬件驱动
+1. 直接阅读 **[12_new_chardev_api_overview.md](12_new_chardev_api_overview.md)** 了解新API概览
+2. 跟随 **[13_cdev_and_device_number.md](13_cdev_and_device_number.md)** 深入学习 cdev 和设备号
+3. 跟随 **[14_class_device_model.md](14_class_device_model.md)** 了解 class 和 device 模型
+4. 跟随 **[17_new_api_driver_analysis.md](17_new_api_driver_analysis.md)** 深入分析驱动代码
+5. 跟随 **[18_app_development_and_testing.md](18_app_development_and_testing.md)** 了解应用开发和测试
 
 ### 📖 老用户迁移
 
 如果你从老内核迁移：
 
-1. 直接阅读 **[11_api_migration_guide.md](11_api_migration_guide.md)**
-2. 参考新老代码对比进行迁移
+迁移指南文档正在更新中，敬请期待...
 
 ---
 
@@ -170,13 +223,37 @@
 - **包含真实调试案例：缓冲区溢出、无限循环、返回值错误**
 - 老API的优缺点分析
 
-**[07_legacy_chardev_led.md](07_legacy_chardev_led.md)** - 老API：LED硬件驱动 🔥
-- 真实硬件操作：寄存器映射、时钟使能、GPIO配置
-- 完整的LED驱动代码
-- `ioremap`/`readl`/`writel` 实战应用
-- **硬件驱动开发的完整流程**
+**[07_hardware_overview.md](07_hardware_overview.md)** - 从虚拟设备到真实硬件：LED 硬件基础 🔥
+- i.MX 6ULL LED 硬件连接与 GPIO 原理
+- 引脚复用（IOMUX）机制详解
+- 时钟树与 CCGR 寄存器
+- **从虚拟设备到真实硬件的过渡**
 
-**[08_new_chardev_api.md](08_new_chardev_api.md)** - 新字符设备驱动API ⭐⭐⭐
+**[08_memory_mapped_io.md](08_memory_mapped_io.md)** - 内存映射 I/O 深度解析 ⭐⭐⭐
+- MMIO 与端口映射 I/O 的区别
+- `ioremap()`/`iounmap()` 源码分析
+- `writel()`/`readl()` 与内存屏障
+- **必读章节，理解硬件访问机制**
+
+**[09_hardware_abstraction_layer.md](09_hardware_abstraction_layer.md)** - 硬件抽象层设计与实现 🔧
+- 分层架构设计理念
+- `led_hw.c` 完整实现解析
+- 初始化流程详解（时钟、引脚复用、GPIO 配置）
+- **工程化驱动设计**
+
+**[10_chardev_implementation.md](10_chardev_implementation.md)** - 字符设备驱动实现 💻
+- 文件操作接口（open/read/write/release）
+- 用户空间与内核空间数据交互
+- 与硬件抽象层的集成
+- **完整的字符设备驱动代码**
+
+**[11_build_test_deploy.md](11_build_test_deploy.md)** - 构建、测试与部署实战 🚀
+- Makefile 解析与交叉编译
+- 模块加载与测试流程
+- 常见问题排查技巧
+- **从代码到运行的全流程**
+
+**[12_new_chardev_api_overview.md](12_new_chardev_api_overview.md)** - 新字符设备驱动API ⭐⭐⭐
 - 新API原理（"三步走"：领号→填表→进门）
 - 动态设备号分配
 - `cdev` 结构体
@@ -184,22 +261,9 @@
 - 新老API对比
 - **推荐学习**
 
-**[10_newchardev_experiment.md](10_newchardev_experiment.md)** - 新API实战实验 🔥
-- 完整的新API LED驱动代码
-- 设备结构体封装
-- `private_data` 使用
-- 自动创建设备节点验证
-
 #### 实验文档
 
-**[09_experiment_code.md](09_experiment_code.md)** - 虚拟设备实验 💻
-- 完整的虚拟设备驱动代码（chrdevbase）
-- 测试程序代码
-- 编译和运行步骤
-- **包含真实调试案例和常见陷阱分析**
-- **无硬件要求，适合练习**
-
-**[10_newchardev_experiment.md](10_newchardev_experiment.md)** - 新API实战实验 🔥
+**[17_new_api_driver_analysis.md](17_new_api_driver_analysis.md)** - 新API实战实验 🔥
 - 完整的新API LED驱动代码
 - 设备结构体封装
 - `private_data` 使用
@@ -208,15 +272,7 @@
 
 #### 参考文档
 
-**[11_api_migration_guide.md](11_api_migration_guide.md)** - API 迁移指南
-- 从老内核到新内核的迁移路径
-- API 详细对比和迁移示例
-- 常见问题和解决方案
-
-**[12_kernel_comparison.md](12_kernel_comparison.md)** - 内核特性对比
-- linux-imx vs mainline 详细对比
-- API 兼容性分析
-- 选择建议和编译差异
+参考文档（API 迁移指南、内核特性对比）正在更新中，敬请期待...
 
 ---
 
@@ -250,19 +306,23 @@
 3. 学习 [03_kernel_module_mechanism.md](03_kernel_module_mechanism.md) 理解内核模块机制
 4. 学习 [05_kernel_debug_techniques.md](05_kernel_debug_techniques.md) 掌握调试技术
 5. 学习 [06_legacy_chardev.md](06_legacy_chardev.md) 了解老API虚拟设备（包含真实调试案例）⭐
-6. 学习 [07_legacy_chardev_led.md](07_legacy_chardev_led.md) 了解老API硬件驱动
-7. 学习 [08_new_chardev_api.md](08_new_chardev_api.md) 掌握新API（核心）
-8. 跟随 [09_experiment_code.md](09_experiment_code.md) 练习虚拟设备（无需硬件）
-9. 跟随 [10_newchardev_experiment.md](10_newchardev_experiment.md) 实践真实硬件驱动
+6. 学习 [07_hardware_overview.md](07_hardware_overview.md) 了解 LED 硬件基础 🔥
+7. 学习 [08_memory_mapped_io.md](08_memory_mapped_io.md) 掌握内存映射 I/O ⭐⭐⭐
+8. 跟随 [09_hardware_abstraction_layer.md](09_hardware_abstraction_layer.md) 理解硬件抽象层设计
+9. 跟随 [10_chardev_implementation.md](10_chardev_implementation.md) 实现字符设备驱动
+10. 跟随 [11_build_test_deploy.md](11_build_test_deploy.md) 部署和测试驱动 🚀
+11. 学习 [12_new_chardev_api_overview.md](12_new_chardev_api_overview.md) 掌握新API（核心）
+12. 跟随 [13_cdev_and_device_number.md](13_cdev_and_device_number.md) 学习 cdev 和设备号管理
+13. 跟随 [14_class_device_model.md](14_class_device_model.md) 了解 class 和 device 模型
+14. 跟随 [17_new_api_driver_analysis.md](17_new_api_driver_analysis.md) 实践真实硬件驱动
 
 **有经验开发者（快速路径）**：
-1. 直接阅读 [08_new_chardev_api.md](08_new_chardev_api.md) 了解新API
-2. 跟随 [10_newchardev_experiment.md](10_newchardev_experiment.md) 实践
+1. 直接阅读 [12_new_chardev_api_overview.md](12_new_chardev_api_overview.md) 了解新API
+2. 跟随 [17_new_api_driver_analysis.md](17_new_api_driver_analysis.md) 实践
 3. **阅读 [06_legacy_chardev.md](06_legacy_chardev.md) 第七章了解常见陷阱** ⭐
 
 **老用户迁移**：
-1. 直接阅读 [11_api_migration_guide.md](11_api_migration_guide.md)
-2. 参考新老代码对比进行迁移
+迁移指南文档正在更新中，敬请期待...
 
 ### 2. 编译驱动
 
@@ -326,7 +386,7 @@ A: 不是强制的，但强烈推荐，可以自动创建设备节点。
 A: 这些教程建立了必要的内核基础概念，理解这些内容会让后续的驱动开发事半功倍。如果你已经有内核开发经验，可以跳过。
 
 ### Q: 06_development_steps.md 去哪了？
-A: 该文档已删除，其内容已整合到 [07_new_chardev_api.md](07_new_chardev_api.md) 中，避免重复内容。
+A: 该文档已删除，其内容已整合到 [12_new_chardev_api_overview.md](12_new_chardev_api_overview.md) 中，避免重复内容。
 
 ---
 
@@ -334,14 +394,13 @@ A: 该文档已删除，其内容已整合到 [07_new_chardev_api.md](07_new_cha
 
 本次教程重构主要改进：
 
-1. **删除重复内容**：删除了 06_development_steps.md，其内容已整合到 07_new_chardev_api.md
+1. **删除重复内容**：删除了 06_development_steps.md，其内容已整合到 12_new_chardev_api_overview.md
 2. **优化学习路径**：按学习难度重新组织文档顺序
    - 阶段一：基础理论（01-05）
-   - 阶段二：API 演进与实战（07-10）
-   - 阶段三：调试与参考（11-13）
+   - 阶段二：API 演进与实战（06-11）
+   - 阶段三：新 API 专题（12-18）
 3. **调整文档定位**：
-   - 07_new_chardev_api.md 作为新API的核心技术文档
-   - 12_kernel_comparison.md 移到最后作为参考文档
+   - 12_new_chardev_api_overview.md 作为新API的核心技术文档
 4. **改进文档导航**：每篇文档都包含前置知识要求、学习目标、下一步指引
 
 ---
@@ -360,4 +419,4 @@ A: 该文档已删除，其内容已整合到 [07_new_chardev_api.md](07_new_cha
 
 **下一步**：
 - 新手：开始学习 [01_introduction.md](01_introduction.md)
-- 有经验者：直接进入 [08_new_chardev_api.md](08_new_chardev_api.md)
+- 有经验者：直接进入 [12_new_chardev_api_overview.md](12_new_chardev_api_overview.md)

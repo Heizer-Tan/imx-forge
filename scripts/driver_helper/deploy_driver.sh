@@ -29,6 +29,10 @@ fi
 
 # 默认参数
 TFTP_DIR="${TFTP_DIR:-/srv/tftp}"
+# 确保 NFS_DIR 是绝对路径
+if [[ -n "$NFS_DIR" && ! "$NFS_DIR" = /* ]]; then
+    NFS_DIR="${PROJECT_ROOT}/${NFS_DIR}"
+fi
 NFS_DIR="${NFS_DIR:-${PROJECT_ROOT}/rootfs/nfs}"
 
 # 列出可部署的驱动

@@ -1,5 +1,7 @@
 # 老API字符设备驱动 - 从零开始踩坑实录
 
+马上准备写驱动了，可以先看看如何配置clangd环境确保写代码丝滑补全和0红线！[06p_ide_setup](06p_ide_setup.md)
+
 ## 前言：我们为什么要折腾这个
 
 前面几节我们把理论都过了一遍：MMU 怎么把虚拟地址变成物理地址，内核为什么不让我们直接访问物理内存，`ioremap` 和 `readl/writel` 这对搭档怎么帮我们绕过这些限制。但说实话，光看理论真的很虚，代码不跑起来，永远不知道哪里会炸。
@@ -420,5 +422,5 @@ dmesg -c
 ---
 
 **相关文档**：
-- [新字符设备驱动API](07_new_chardev_api.md)
-- [新API实战实验](09_newchardev_experiment.md)
+- [新字符设备驱动 API 概览](12_new_chardev_api_overview.md)
+- [新 API 驱动代码深度解析](17_new_api_driver_analysis.md)
