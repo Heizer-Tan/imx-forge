@@ -29,33 +29,155 @@ fi
 
 # 默认参数
 TFTP_DIR="${TFTP_DIR:-/srv/tftp}"
+# 确保 NFS_DIR 是绝对路径
+if [[ -n "$NFS_DIR" && ! "$NFS_DIR" = /* ]]; then
+    NFS_DIR="${PROJECT_ROOT}/${NFS_DIR}"
+fi
 NFS_DIR="${NFS_DIR:-${PROJECT_ROOT}/rootfs/nfs}"
+
+# 列出可部署的驱动
+list_drivers() {
+    log_info "========================================"
+    log_info "可部署驱动列表"
+    log_info "========================================"
+
+    local artifacts_dir="${PROJECT_ROOT}/out/driver_artifacts"
+    local driver_dir="${PROJECT_ROOT}/driver"
+
+    # 检查是否有已构建的产物
+    if [[ -d "$artifacts_dir" ]]; then
+        local found_any=0
+        for driver_path in "${artifacts_dir}"/*/; do
+            if [[ -d "$driver_path" ]]; then
+                local driver=$(basename "$driver_path")
+
+                # 跳过非驱动目录
+                if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]]; then
+                    continue
+                fi
+
+                log_info ""
+                log_info "📦 $driver"
+
+                # 列出该驱动下的所有板卡产物
+                for board_path in "$driver_path"/*/; do
+                    if [[ -d "$board_path" ]]; then
+                        local board=$(basename "$board_path")
+                        local has_ko=0
+                        local has_dtb=0
+                        local file_count=0
+
+                        # 检查文件
+                        [[ $(find "$board_path" -maxdepth 1 -name "*.ko" -type f | wc -l) -gt 0 ]] && has_ko=1
+                        [[ $(find "$board_path" -maxdepth 1 -name "*.dtb" -type f | wc -l) -gt 0 ]] && has_dtb=1
+                        file_count=$(find "$board_path" -maxdepth 1 -type f \( -name "*.ko" -o -name "*.dtb" \) | wc -l)
+
+                        if [[ $file_count -gt 0 ]]; then
+                            local status=""
+                            [[ $has_ko -eq 1 ]] && status="${status}✓ KO "
+                            [[ $has_dtb -eq 1 ]] && status="${status}✓ DTB"
+                            log_info "  └─ ${board} [${status}]"
+                            log_info "     路径: out/driver_artifacts/${driver}/${board}"
+                            found_any=1
+                        fi
+                    fi
+                done
+            fi
+        done
+
+        if [[ $found_any -eq 0 ]]; then
+            log_info ""
+            log_warn "未找到已构建的驱动产物"
+            log_info ""
+            log_info "请先使用 build_driver.sh 构建驱动："
+            log_info "  ./scripts/driver_helper/build_driver.sh <驱动名> <板名>"
+        fi
+    else
+        log_info ""
+        log_warn "产物目录不存在: $artifacts_dir"
+        log_info ""
+        log_info "请先使用 build_driver.sh 构建驱动："
+        log_info "  ./scripts/driver_helper/build_driver.sh <驱动名> <板名>"
+    fi
+
+    # 显示可用的驱动源码
+    log_info ""
+    log_info "========================================"
+    log_info "可用的驱动源码"
+    log_info "========================================"
+
+    if [[ -d "$driver_dir" ]]; then
+        local source_count=0
+        for drv_path in "${driver_dir}"/*/; do
+            if [[ -d "$drv_path" ]]; then
+                local drv=$(basename "$drv_path")
+
+                # 跳过非驱动目录
+                if [[ "$drv" == "base_driver" ]] || [[ "$drv" == "device_tree" ]] || [[ "$drv" == "firmwares" ]]; then
+                    continue
+                fi
+
+                source_count=$((source_count + 1))
+                log_info "  📁 $drv"
+            fi
+        done
+
+        if [[ $source_count -eq 0 ]]; then
+            log_info "  (无)"
+        fi
+    else
+        log_info "  驱动源码目录不存在: $driver_dir"
+    fi
+
+    log_info ""
+    log_info "========================================"
+    log_info "使用方法:"
+    log_info "  $(basename "$0") <驱动名> <板名>"
+    log_info ""
+    log_info "示例:"
+    log_info "  $(basename "$0") chardev_base_00 alpha-board"
+    log_info "========================================"
+}
 
 # 显示帮助
 show_help() {
     cat << EOF
-用法: $(basename "$0") <产物目录> [选项]
+用法: $(basename "$0") <驱动名> [板名] [选项]
+   或: $(basename "$0") <产物目录> [选项]
+   或: $(basename "$0") --list
 
 参数:
-  产物目录  驱动产物目录路径
+  驱动名        驱动名称（如：chardev_base_00）
+  板名          板名称（如：alpha-board，默认：alpha-board）
+  产物目录      驱动产物目录的完整路径
 
 选项:
-  --target=TYPE    部署目标 (tftp|nfs|local|remote)
-  --tftp-dir=PATH  TFTP目录
-  --nfs-dir=PATH   NFS目录
-  --local-dir=PATH 本地目录
-  --remote=HOST    远程主机
+  --list            列出所有可部署的驱动（已构建的产物）
+  --target=TYPE     部署目标 (tftp|nfs|local|remote)
+  --tftp-dir=PATH   TFTP目录
+  --nfs-dir=PATH    NFS目录
+  --local-dir=PATH  本地目录
+  --remote=HOST     远程主机
   --remote-path=PATH 远程路径
+  --help, -h        显示此帮助信息
 
 示例:
-  # 交互式部署
-  $(basename "$0") out/driver_artifacts/example-driver/alpha-board
+  # 列出可部署的驱动
+  $(basename "$0") --list
+
+  # 使用驱动名和板名（推荐）
+  $(basename "$0") chardev_base_00 alpha-board
+  $(basename "$0") chardev_base_00          # 使用默认板名 alpha-board
+
+  # 使用产物目录路径
+  $(basename "$0") out/driver_artifacts/chardev_base_00/alpha-board
+  $(basename "$0") driver/chardev_base_00/alpha-board
 
   # 直接部署到TFTP
-  $(basename "$0") out/driver_artifacts/example-driver/alpha-board --target=tftp
+  $(basename "$0") chardev_base_00 alpha-board --target=tftp
 
   # 部署到NFS
-  $(basename "$0") out/driver_artifacts/example-driver/alpha-board --target=nfs
+  $(basename "$0") chardev_base_00 alpha-board --target=nfs
 
 EOF
 }
@@ -212,8 +334,13 @@ main() {
     local remote_path=""
 
     # 解析参数
+    local driver_name=""
+    local board_name=""
+    local positional_args=()
+
     while [[ $# -gt 0 ]]; do
         case "$1" in
+            --list) list_drivers; exit 0 ;;
             --target=*) target="${1#*=}"; shift ;;
             --tftp-dir=*) tftp_dir="${1#*=}"; shift ;;
             --nfs-dir=*) nfs_dir="${1#*=}"; shift ;;
@@ -227,15 +354,58 @@ main() {
                 exit 1
                 ;;
             *)
-                artifacts_dir="$1"
+                positional_args+=("$1")
                 shift
                 ;;
         esac
     done
 
-    # 检查参数
-    if [[ -z "$artifacts_dir" ]]; then
+    # 处理位置参数
+    if [[ ${#positional_args[@]} -eq 0 ]]; then
         log_error "缺少产物目录参数"
+        show_help
+        exit 1
+    elif [[ ${#positional_args[@]} -eq 1 ]]; then
+        # 单个参数，可能是目录路径或驱动名
+        artifacts_dir="${positional_args[0]}"
+        # 如果不是有效目录，尝试构建路径
+        if [[ ! -d "$artifacts_dir" ]]; then
+            # 尝试: out/driver_artifacts/<驱动名>/alpha-board
+            local guess1="${PROJECT_ROOT}/out/driver_artifacts/${artifacts_dir}/alpha-board"
+            # 尝试: driver/<驱动名>/alpha-board
+            local guess2="${PROJECT_ROOT}/driver/${artifacts_dir}/alpha-board"
+            # 尝试: out/driver_artifacts/<驱动名>/<板名>（如果板名是默认的）
+            if [[ -d "$guess1" ]]; then
+                artifacts_dir="$guess1"
+            elif [[ -d "$guess2" ]]; then
+                artifacts_dir="$guess2"
+            else
+                log_error "目录不存在: $artifacts_dir"
+                log_error "尝试查找的路径:"
+                log_error "  - $guess1"
+                log_error "  - $guess2"
+                exit 1
+            fi
+        fi
+    elif [[ ${#positional_args[@]} -eq 2 ]]; then
+        # 两个参数：驱动名 和 板名
+        driver_name="${positional_args[0]}"
+        board_name="${positional_args[1]}"
+        artifacts_dir="${PROJECT_ROOT}/out/driver_artifacts/${driver_name}/${board_name}"
+        # 如果产物目录不存在，尝试源码目录
+        if [[ ! -d "$artifacts_dir" ]]; then
+            local src_dir="${PROJECT_ROOT}/driver/${driver_name}/${board_name}"
+            if [[ -d "$src_dir" ]]; then
+                artifacts_dir="$src_dir"
+                log_warn "产物目录不存在，使用源码目录: $artifacts_dir"
+            else
+                log_error "目录不存在: $artifacts_dir"
+                log_error "源码目录也不存在: $src_dir"
+                exit 1
+            fi
+        fi
+    else
+        log_error "参数过多"
         show_help
         exit 1
     fi

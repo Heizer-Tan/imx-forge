@@ -400,6 +400,49 @@ clean_driver_artifacts() {
 }
 
 #
+# 深度清理构建产物（包括中间文件）
+#
+deep_clean_driver_artifacts() {
+    local output_dir="$1"
+    local driver_dir="$2"
+
+    # 1. 清理最终产物
+    if [[ -d "$output_dir" ]]; then
+        log_info "清理最终产物: $output_dir"
+        rm -rf "$output_dir"
+    fi
+
+    # 2. 清理中间构建文件
+    if [[ -d "$driver_dir" ]]; then
+        log_info "清理中间构建文件: $driver_dir"
+
+        # 删除常见的内核构建中间文件
+        log_debug "  删除 .o, .ko, .mod, .cmd 等文件"
+        find "$driver_dir" -maxdepth 1 \
+            \( -name "*.o" -o \
+               -name "*.ko" -o \
+               -name "*.mod" -o \
+               -name "*.mod.c" -o \
+               -name "*.mod.o" -o \
+               -name "*.cmd" -o \
+               -name "Module.symvers" -o \
+               -name "modules.order" \) -delete 2>/dev/null || true
+
+        # 删除 .tmp_versions 目录
+        log_debug "  删除 .tmp_versions 目录"
+        find "$driver_dir" -maxdepth 1 -name ".tmp_versions" -type d -exec rm -rf {} + 2>/dev/null || true
+
+        # 运行 make clean 以确保彻底清理
+        cd "$driver_dir"
+        make clean >/dev/null 2>&1 || true
+
+        log_info "✓ 深度清理完成"
+    else
+        log_debug "驱动目录不存在: $driver_dir"
+    fi
+}
+
+#
 # 主构建函数
 #
 driver_build() {
@@ -449,9 +492,14 @@ driver_build() {
             make clean >/dev/null 2>&1 || true
             log_info "✓ 清理完成"
             ;;
+        deep_clean)
+            log_info "🧹 深度清理驱动: ${driver_name}/${board}"
+            deep_clean_driver_artifacts "$output_dir" "$driver_dir"
+            log_info "✓ 深度清理完成"
+            ;;
         *)
             log_error "未知操作: $action"
-            log_info "支持的操作: build, clean"
+            log_info "支持的操作: build, clean, deep_clean"
             return 1
             ;;
     esac

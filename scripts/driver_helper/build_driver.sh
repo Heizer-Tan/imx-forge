@@ -43,7 +43,8 @@ show_help() {
 选项:
   --list              列出所有可用的驱动
   --all               构建所有驱动
-  --clean             清理构建产物
+  --clean             清理构建产物（仅清理最终产物）
+  --deep-clean        深度清理（清理最终产物和中间构建文件）
   --board=NAME        只构建指定板卡的驱动
   --kernel=TYPE       选择内核类型 (mainline|imx，默认: mainline)
   --help, -h          显示此帮助信息
@@ -75,6 +76,12 @@ show_help() {
   # 清理所有驱动的构建产物
   $(basename "$0") --clean --all
 
+  # 深度清理指定驱动（包括中间构建文件）
+  $(basename "$0") --deep-clean example-driver
+
+  # 深度清理所有驱动
+  $(basename "$0") --deep-clean --all
+
 可用内核类型:
   - mainline: 主线内核 (默认)
   - imx:      NXP BSP内核
@@ -98,7 +105,7 @@ list_drivers() {
         if [[ -d "$driver_dir" ]]; then
             local driver=$(basename "$driver_dir")
             # 跳过非驱动目录
-            if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]]; then
+            if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
                 continue
             fi
 
@@ -147,11 +154,31 @@ build_specific_driver() {
     log_info "========================================"
 
     # 调用共享构建库
-    driver_build "$driver" "$board" "build" "$kernel"
+    if driver_build "$driver" "$board" "build" "$kernel"; then
+        log_info ""
+        log_info "📦 产物位置: ${PROJECT_ROOT}/out/driver_artifacts/${driver}/${board}/"
+        log_info "========================================"
 
-    log_info ""
-    log_info "📦 产物位置: ${PROJECT_ROOT}/out/driver_artifacts/${driver}/${board}/"
-    log_info "========================================"
+        # 构建成功后询问是否部署
+        echo ""
+        echo -e "${GREEN}构建成功！${NC}"
+        echo -n "是否部署驱动? [Y/n]: "
+        read -r response
+
+        # 默认为是，除非用户明确输入 n 或 N
+        if [[ -z "$response" ]] || [[ "$response" =~ ^[Yy]$ ]]; then
+            echo ""
+            log_info "开始部署驱动..."
+            # 调用部署脚本
+            "${SCRIPT_DIR}/deploy_driver.sh" "$driver" "$board"
+        else
+            log_info "跳过部署"
+        fi
+    else
+        log_error ""
+        log_error "构建失败，跳过部署"
+        return 1
+    fi
 }
 
 # 清理指定驱动
@@ -165,6 +192,22 @@ clean_specific_driver() {
 
     # 调用共享构建库
     driver_build "$driver" "$board" "clean" ""
+
+    log_info ""
+    log_info "========================================"
+}
+
+# 深度清理指定驱动
+deep_clean_specific_driver() {
+    local driver="$1"
+    local board="${2:-alpha-board}"
+
+    log_info "========================================"
+    log_info "深度清理驱动: $driver/$board"
+    log_info "========================================"
+
+    # 调用共享构建库
+    driver_build "$driver" "$board" "deep_clean" ""
 
     log_info ""
     log_info "========================================"
@@ -245,6 +288,14 @@ while [[ $# -gt 0 ]]; do
                 shift
             fi
             ;;
+        --deep-clean)
+            ACTION="deep_clean"
+            shift
+            if [[ $# -gt 0 && "$1" == "--all" ]]; then
+                DRIVER_NAME="--all"
+                shift
+            fi
+            ;;
         --all)
             if [[ "$ACTION" != "clean" ]]; then
                 ACTION="all"
@@ -302,7 +353,7 @@ case $ACTION in
                 if [[ -d "$driver_dir" ]]; then
                     driver=$(basename "$driver_dir")
                     # 跳过非驱动目录
-                    if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]]; then
+                    if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
                         continue
                     fi
 
@@ -322,6 +373,39 @@ case $ACTION in
         else
             # 清理指定驱动
             clean_specific_driver "$DRIVER_NAME" "$BOARD_NAME"
+        fi
+        ;;
+    deep_clean)
+        if [[ "$DRIVER_NAME" == "--all" || -z "$DRIVER_NAME" ]]; then
+            # 深度清理所有驱动
+            log_info "========================================"
+            log_info "批量深度清理所有驱动"
+            log_info "========================================"
+
+            for driver_dir in "${PROJECT_ROOT}"/driver/*/; do
+                if [[ -d "$driver_dir" ]]; then
+                    driver=$(basename "$driver_dir")
+                    # 跳过非驱动目录
+                    if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
+                        continue
+                    fi
+
+                    # 遍历板卡
+                    for board_dir in "$driver_dir"*/; do
+                        if [[ -d "$board_dir" ]]; then
+                            board=$(basename "$board_dir")
+                            driver_build "$driver" "$board" "deep_clean" ""
+                        fi
+                    done
+                fi
+            done
+
+            log_info "========================================"
+            log_info "✓ 深度清理完成"
+            log_info "========================================"
+        else
+            # 深度清理指定驱动
+            deep_clean_specific_driver "$DRIVER_NAME" "$BOARD_NAME"
         fi
         ;;
     build)
