@@ -1077,9 +1077,9 @@ jobs:
 
 ## 参考文档
 
-- [docker/README.md](../../docker/README.md) - IMX-Forge Docker 环境详细参考
+- [docker/README.md](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/docker/README.md) - IMX-Forge Docker 环境详细参考
 - [Docker 官方文档](https://docs.docker.com/)
-- [项目主 README](../../README.md)
+- [项目主 README](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/README.md)
 - [快速入门指南](../QUICK_START.md)
 
 ---

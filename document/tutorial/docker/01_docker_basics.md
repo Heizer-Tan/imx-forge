@@ -1055,7 +1055,7 @@ docker volume inspect mydata
 学习完基础知识后，继续阅读：
 
 - [IMX-Forge Docker 开发指南](02_imx_forge_docker_guide.md) - 学习如何在 IMX-Forge 项目中使用 Docker
-- [docker/README.md](../../docker/README.md) - IMX-Forge Docker 环境详细参考
+- [docker/README.md](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/docker/README.md) - IMX-Forge Docker 环境详细参考
 
 ## 参考资料
 

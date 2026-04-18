@@ -186,9 +186,9 @@ Docker 用户可以直接跳转到 [快速构建](#快速构建) 章节，构建
 
 - **Q: 镜像构建失败？** 检查网络连接，国内用户使用 Dockerfile.cn
 - **Q: 容器内无法访问 USB？** 使用 `--privileged -v /dev:/dev` 参数
-- **Q: 编译产物权限问题？** Docker 容器使用 ubuntu 用户(UID 1000)，如有问题请查看 [docker/README.md](../docker/README.md)
+- **Q: 编译产物权限问题？** Docker 容器使用 ubuntu 用户(UID 1000)，如有问题请查看 [docker/README.md](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/docker/README.md)
 
-详细文档请参考 [docker/README.md](../docker/README.md)。
+详细文档请参考 [docker/README.md](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/docker/README.md)。
 
 ---
 

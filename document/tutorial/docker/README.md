@@ -19,7 +19,7 @@
 
 ## 参考文档
 
-- [docker/README.md](../../docker/README.md) - Docker 环境参考手册
+- [docker/README.md](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/blob/main/docker/README.md) - Docker 环境参考手册
 - [Docker 官方文档](https://docs.docker.com/)
 
 ## 适合谁
