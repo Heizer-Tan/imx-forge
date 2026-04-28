@@ -34,7 +34,7 @@ source "${SCRIPT_DIR}/../init/env-init.sh"
 ARCH=arm
 CROSS_COMPILE=arm-none-linux-gnueabihf-
 DEFCONFIG=mx6ull_aes_emmc_defconfig
-DEFAULT_DEVICE_TREE="imx6ull-14x14-evk-emmc"
+DEFAULT_DEVICE_TREE="imx6ull-aes"
 
 # Directories
 UBOOT_SRC_DIR="${PROJECT_ROOT}/third_party/uboot-imx"
@@ -92,7 +92,7 @@ check_device_tree() {
     log_info "Device tree found: ${DTS_FILE}"
 
     # Also check for the .dtsi base file if it exists
-    BASE_DTS="${UBOOT_SRC_DIR}/arch/arm/dts/imx6ull-14x14-evk.dts"
+    BASE_DTS="${UBOOT_SRC_DIR}/arch/arm/dts/${DEFAULT_DEVICE_TREE}.dtsi"
     if [ -f "${BASE_DTS}" ]; then
         log_info "Base device tree found: ${BASE_DTS}"
     fi

@@ -44,6 +44,10 @@ fi
 BUILD_OUTPUT_DIR="${PROJECT_ROOT}/out/release-latest"
 CROSS_COMPILE=arm-none-linux-gnueabihf-
 
+# Device tree selection (can be overridden via environment variable)
+# Example: DEFAULT_DEVICE_TREE="imx6ull-14x14-evk-emmc" ./scripts/release-all.sh
+: "${DEFAULT_DEVICE_TREE:=imx6ull-aes}"
+
 # Build options
 FAST_BUILD=0
 SPECIFIC_STAGE=""
@@ -81,6 +85,9 @@ Options:
   --stage N         Run only specific stage (1-4)
   --help, -h        Show this help message
 
+Environment Variables:
+  DEFAULT_DEVICE_TREE  Device tree name for symlinks (default: imx6ull-aes)
+
 Stages:
   1  U-Boot bootloader
   2  Linux kernel
@@ -88,10 +95,11 @@ Stages:
   4  RootFS completion with third-party dependencies
 
 Examples:
-  $0                          # Build all stages
-  $0 --stage 1                # Build U-Boot only
-  $0 --fast-build             # Build all with fast build mode
-  $0 --stage 2 --fast-build   # Build Linux with fast build mode
+  $0                                          # Build all stages
+  $0 --stage 1                                # Build U-Boot only
+  $0 --fast-build                             # Build all with fast build mode
+  $0 --stage 2 --fast-build                   # Build Linux with fast build mode
+  DEFAULT_DEVICE_TREE=custom-dtb $0           # Use custom device tree
 
 Output directory: ${BUILD_OUTPUT_DIR}/
 EOF
@@ -220,9 +228,12 @@ create_symlinks() {
     fi
 
     # Device trees (if available)
-    if [[ -f "${BUILD_OUTPUT_DIR}/linux/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dtb" ]]; then
-        ln -sf "../linux/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dtb" "${images_dir}/"
-        log_info "  + images/imx6ull-14x14-evk-emmc.dtb"
+    local dtb_path="${BUILD_OUTPUT_DIR}/linux/arch/arm/boot/dts/nxp/imx/${DEFAULT_DEVICE_TREE}.dtb"
+    if [[ -f "${dtb_path}" ]]; then
+        ln -sf "../linux/arch/arm/boot/dts/nxp/imx/${DEFAULT_DEVICE_TREE}.dtb" "${images_dir}/"
+        log_info "  + images/${DEFAULT_DEVICE_TREE}.dtb"
+    else
+        log_warn "  ! DTB not found: ${DEFAULT_DEVICE_TREE} (non-fatal)"
     fi
 
     log_info "Symlinks created in ${images_dir}/"
