@@ -291,36 +291,53 @@ deploy_remote() {
     log_info "已复制 $count 个文件"
 }
 
-# 交互式选择
+# 交互式选择（支持多选）
 select_target() {
     local src="$1"
 
     echo ""
-    echo "选择部署目标:"
+    echo "选择部署目标 (可多选，用空格分隔，如: 1 2):"
     echo "1) TFTP服务器"
     echo "2) NFS rootfs"
     echo "3) 本地目录"
     echo "4) 远程服务器"
     echo ""
-    read -p "请选择 [1-4]: " choice
+    read -p "请选择 [1-4]: " choices
 
-    case "$choice" in
-        1) deploy_tftp "$src" "$TFTP_DIR" ;;
-        2) deploy_nfs "$src" "$NFS_DIR" ;;
-        3)
-            read -p "目标目录: " dir
-            deploy_local "$src" "$dir"
-            ;;
-        4)
-            read -p "远程主机 (user@host): " host
-            read -p "远程路径: " path
-            deploy_remote "$src" "$host" "$path"
-            ;;
-        *)
-            log_error "无效选择"
-            return 1
-            ;;
-    esac
+    # 处理用户输入（支持空格、逗号分隔）
+    local targets=()
+    for choice in ${choices//,/ }; do
+        case "$choice" in
+            1) targets+=("tftp") ;;
+            2) targets+=("nfs") ;;
+            3) targets+=("local") ;;
+            4) targets+=("remote") ;;
+            *) ;;
+        esac
+    done
+
+    if [[ ${#targets[@]} -eq 0 ]]; then
+        log_error "无效选择"
+        return 1
+    fi
+
+    # 按顺序部署到选中的目标
+    for target in "${targets[@]}"; do
+        echo ""
+        case "$target" in
+            tftp) deploy_tftp "$src" "$TFTP_DIR" ;;
+            nfs) deploy_nfs "$src" "$NFS_DIR" ;;
+            local)
+                read -p "目标目录: " dir
+                deploy_local "$src" "$dir"
+                ;;
+            remote)
+                read -p "远程主机 (user@host): " host
+                read -p "远程路径: " path
+                deploy_remote "$src" "$host" "$path"
+                ;;
+        esac
+    done
 }
 
 # 主函数
