@@ -753,4 +753,4 @@ void __iomem *addr = of_iomap(node, 0);
 
 这些内容会在后续的驱动实战章节中逐步展开。下一章，我们将深入平台设备驱动，看看设备树是如何与 Linux 驱动模型配合工作的。
 
-**继续阅读：[06. 平台设备驱动](./06_platform_device_driver.md)**
+**继续阅读：[06. OF API 验证](./06_of_api_verification.md)**

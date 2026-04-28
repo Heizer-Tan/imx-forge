@@ -86,6 +86,8 @@ static struct platform_device *smdk2440_devices[] __initdata = {
 
 一个 SOC 可以造出无数种板子，但我们只需要把通用的 SOC 信息提取到 `.dtsi` 里，具体的 `.dts` 文件直接 `include` 进去就行了。这不仅解决了代码膨胀，还让代码结构变得清晰。
 
+关于设备树的事情——咱们的仓库笔者提交了之前的笔者读文档的时候随手写的教程，可以访问仓库中的document/tutorial/driver/device_tree目录查看。
+
 ## 与之前教程的衔接：从硬编码到设备树
 
 如果你跟着我们的教程一路走过来，你应该还记得在 `00_chardev_base` 章节里，我们写驱动的时候用的是硬编码方式。
@@ -112,4 +114,4 @@ static struct platform_device *smdk2440_devices[] __initdata = {
 
 ---
 
-**下一步：** 继续阅读 [02_dts_syntax_basics.md](02_dts_syntax_basics.md) 了解设备树的基本语法，或者直接跳到实战章节看看具体怎么写一个 LED 的设备树文件。
+**下一步：** 继续阅读 [02_dtc_deep_dive.md](02_dtc_deep_dive.md) 了解设备树的编译原理和 DTC 工具，或者直接跳到实战章节看看具体怎么写一个 LED 的设备树文件。
