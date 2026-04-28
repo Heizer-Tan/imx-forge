@@ -1,0 +1,22 @@
+/dts-v1/;
+#include "imx6ull.dtsi"
+#include "imx6ull-aes.dtsi"
+
+/ {
+	model = "Awesome Embedded Studio IMX6ULL Example Driver";
+	compatible = "fsl,imx6ull-14x14-evk", "fsl,imx6ull";
+	/**
+	 * PS 下，可以看到我们在/下追加了一个新的LED等节点
+	 */
+	imx_aes_led {
+		#address-cells = <1>; 
+		#size-cells = <1>; 
+		compatible = "atkalpha-led"; 
+		status = "okay"; 
+		reg = < 0X020C406C 0X04 /* CCM_CCGR1_BASE */ 
+				0X020E0068 0X04 /* SW_MUX_GPIO1_IO03_BASE */ 
+				0X020E02F4 0X04 /* SW_PAD_GPIO1_IO03_BASE */ 
+				0X0209C000 0X04 /* GPIO1_DR_BASE */ 
+				0X0209C004 0X04 >; /* GPIO1_GDIR_BASE */
+	};
+};
