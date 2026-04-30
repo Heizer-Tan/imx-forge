@@ -1,0 +1,82 @@
+name: PR Quick Checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_IMAGE: imx-forge:ci
+
+jobs:
+  # Job 1: 文档验证
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检查脚本 README 覆盖率
+        run: ./develop/scripts_readme_check.sh
+
+      - name: 验证 MkDocs 配置
+        run: ./scripts/document/mkdocs_dev.sh build
+
+  # Job 2: 脚本语法检查
+  shellcheck:
+    name: Shell Scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 运行 ShellCheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y shellcheck
+          # 检查所有 shell 脚本
+          find ./scripts -type f \( -name "*.sh" -o -name "*.bash" \) -exec shellcheck -x {} + 2>&1 || true
+
+  # Job 3: 配置验证
+  configs:
+    name: Configuration Files
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检查 defconfig 存在性
+        run: |
+          [ -f "driver/device_tree/alpha-board/linux/imx_aes_defconfig.template" ] || exit 1
+          echo "defconfig 模板存在"
+
+      - name: 检查设备树文件存在性
+        run: |
+          dts_count=$(find driver/device_tree -name "*.dts" 2>/dev/null | wc -l)
+          echo "找到 $dts_count 个设备树文件"
+          if [[ "$dts_count" -gt 0 ]]; then
+            echo "设备树文件将在驱动构建时验证"
+          fi
+
+  # Job 4: Docker 环境验证
+  docker:
+    name: Docker Environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 构建 Docker 镜像
+        run: |
+          cd docker
+          docker build -t ${{ env.DOCKER_IMAGE }} .
+
+      - name: 验证工具链
+        run: |
+          docker run --rm --user root ${{ env.DOCKER_IMAGE }} \
+            arm-none-linux-gnueabihf-gcc --version
