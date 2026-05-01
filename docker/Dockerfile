@@ -73,6 +73,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libts-dev \
     libpulse-dev \
     libasound2-dev \
+    wget \
+    curl \
+    ca-certificates \
+    ccache \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 

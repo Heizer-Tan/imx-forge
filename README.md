@@ -11,6 +11,7 @@
 
 **面向 NXP i.MX6ULL 的嵌入式 Linux 开发工坊 —— 从工具链到 QT 应用的完整学习路径**
 
+[![CI](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/actions/workflows/ci-build.yml/badge.svg)](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/actions/workflows/ci-build.yml)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/Awesome-Embedded-Learning-Studio/imx-forge?style=flat-square)](#-贡献者)
 [![Docker](https://img.shields.io/badge/Docker-supported%20%EF%83%8B-blue?style=flat-square)](docker/README.md)
@@ -285,6 +286,19 @@ imx-forge/
 - [ ] 教程文档持续完善
 
 完整规划见 [document/todo/todo.md](document/todo/todo.md)。
+
+---
+
+## ✅ CI/CD
+
+项目通过 GitHub Actions 实现自动化构建测试，确保代码质量：
+
+- **组件构建验证** - 每次提交自动检测变更并触发相关组件构建
+- **智能缓存** - 使用 ccache 加速构建，提升 CI 效率
+- **多轨支持** - 同时验证 U-Boot、Linux NXP BSP、Linux Mainline、BusyBox
+- **文档检查** - Shell 脚本语法检查、文档覆盖率验证
+
+[查看 CI 状态](https://github.com/Awesome-Embedded-Learning-Studio/imx-forge/actions)
 
 ---
 

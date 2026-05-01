@@ -168,11 +168,12 @@ check_valid_rootfs() {
 }
 
 # Check if overlay directory exists and has content
+# Returns 0 if exists and has content, 1 otherwise
+# Note: This function only returns status, caller should log messages
 check_overlay_exists() {
     local overlay="$1"
 
     if [[ ! -d "$overlay" ]]; then
-        log_error "Overlay directory does not exist: $overlay"
         return 1
     fi
 
@@ -186,7 +187,6 @@ check_overlay_exists() {
     done
 
     if [[ $has_content -eq 0 ]]; then
-        log_error "Overlay directory is empty: $overlay"
         return 1
     fi
 
