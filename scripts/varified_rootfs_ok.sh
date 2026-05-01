@@ -183,6 +183,21 @@ create_fstab() {
 
     log_info "Creating etc/fstab..."
 
+    # Remove existing file if present and writable
+    if [[ -e "$fstab_file" ]]; then
+        if [[ -w "$fstab_file" ]]; then
+            rm -f "$fstab_file"
+        elif [[ -w "${rootfs}/etc" ]]; then
+            # Directory is writable but file is not, try to remove
+            rm -f "$fstab_file" 2>/dev/null || true
+        else
+            log_warn "  Cannot remove existing file (not writable)"
+            log_warn "  Skipping fstab creation"
+            return 0
+        fi
+    fi
+
+    # Create the file
     cat > "$fstab_file" << 'EOF'
 #<file system>  <mount point>   <type>  <options>   <dump>  <pass>
 proc            /proc           proc    defaults    0       0
@@ -201,6 +216,13 @@ create_rcs() {
     log_info "Creating etc/init.d/rcS..."
 
     mkdir -p "${rootfs}/etc/init.d"
+
+    # Check if we can write to the target location
+    if [[ -e "$rcs_file" ]] && [[ ! -w "$rcs_file" ]] && [[ ! -w "${rootfs}/etc/init.d" ]]; then
+        log_warn "  Cannot write to $rcs_file (not writable)"
+        log_warn "  Skipping rcS creation"
+        return 0
+    fi
 
     cat > "$rcs_file" << 'EOF'
 #!/bin/sh
@@ -223,7 +245,7 @@ mount -t devpts devpts /dev/pts
 mdev -s
 EOF
 
-    chmod +x "$rcs_file"
+    chmod +x "$rcs_file" 2>/dev/null || true
     log_info "  Created: $rcs_file (executable)"
 }
 
@@ -233,6 +255,13 @@ create_inittab() {
     local inittab_file="${rootfs}/etc/inittab"
 
     log_info "Creating etc/inittab..."
+
+    # Check if we can write to the target location
+    if [[ -e "$inittab_file" ]] && [[ ! -w "$inittab_file" ]] && [[ ! -w "${rootfs}/etc" ]]; then
+        log_warn "  Cannot write to $inittab_file (not writable)"
+        log_warn "  Skipping inittab creation"
+        return 0
+    fi
 
     cat > "$inittab_file" << 'EOF'
 # /etc/inittab - init process configuration
@@ -260,6 +289,12 @@ EOF
 # Run third-party installation scripts
 run_third_party_installs() {
     local rootfs="$1"
+
+    # Skip third-party installations if requested
+    if [[ "${SKIP_THIRD_PARTY_INSTALL:-false}" == "true" ]]; then
+        log_info "Skipping third-party installations (SKIP_THIRD_PARTY_INSTALL=true)"
+        return 0
+    fi
 
     if [[ ! -d "$THIRD_PARTY_INSTALL_DIR" ]]; then
         log_debug "Third-party install directory not found: $THIRD_PARTY_INSTALL_DIR"
