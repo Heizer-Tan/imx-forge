@@ -417,7 +417,7 @@ jobs:
         with:
           script: |
             const needs = ${{ toJson(needs) }};
-            const jobs = ['uboot', 'linux-imx', 'linux-mainline', 'busybox', 'drivers'];
+            const jobs = ['U-Boot', 'Linux (NXP BSP)', 'Linux (Mainline)', 'BusyBox', 'Drivers'];
 
             // 检查是否有任何构建失败
             let hasFailures = false;
@@ -449,12 +449,18 @@ jobs:
             }
 
             // 向 GitHub Status API 报告状态
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: context.sha,
-              state: state,
-              context: 'Component Build',
-              description: description,
-              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
-            });
+            try {
+              const status = await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: context.sha,
+                state: state,
+                context: 'Component Build',
+                description: description,
+                target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              });
+              console.log('Status created:', status.data);
+            } catch (error) {
+              console.error('Failed to create status:', error);
+              throw error;
+            }
