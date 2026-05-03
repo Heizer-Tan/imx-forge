@@ -387,6 +387,7 @@ jobs:
             -e CCACHE_COMPILERCHECK=content \
             ${{ env.DOCKER_IMAGE }} \
             bash -c '
+              set -e
               ccache -M 2G && ccache -z
               mkdir -p /workspace/ccache-bin
               ln -sf /usr/bin/ccache /workspace/ccache-bin/arm-none-linux-gnueabihf-gcc

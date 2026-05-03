@@ -231,8 +231,8 @@ build_all_drivers() {
     for driver_dir in "${PROJECT_ROOT}"/driver/*/; do
         if [[ -d "$driver_dir" ]]; then
             local driver=$(basename "$driver_dir")
-            # 跳过base_driver目录
-            if [[ "$driver" == "base_driver" ]]; then
+            # 跳过非驱动目录
+            if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
                 continue
             fi
 
