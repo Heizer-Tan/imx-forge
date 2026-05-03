@@ -231,8 +231,8 @@ build_all_drivers() {
     for driver_dir in "${PROJECT_ROOT}"/driver/*/; do
         if [[ -d "$driver_dir" ]]; then
             local driver=$(basename "$driver_dir")
-            # 跳过base_driver目录
-            if [[ "$driver" == "base_driver" ]]; then
+            # 跳过非驱动目录
+            if [[ "$driver" == "base_driver" ]] || [[ "$driver" == "device_tree" ]] || [[ "$driver" == "firmwares" ]] || [[ "$driver" == "application" ]]; then
                 continue
             fi
 
@@ -271,6 +271,9 @@ build_all_drivers() {
     log_info "========================================"
     log_info "总计: $total | 成功: $success | 失败: $failed"
     log_info "========================================"
+
+    # 如果有失败，返回非零退出码
+    [[ $failed -eq 0 ]]
 }
 
 # 解析命令行参数

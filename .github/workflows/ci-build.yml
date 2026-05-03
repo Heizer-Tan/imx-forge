@@ -75,12 +75,7 @@ jobs:
         run: cd docker && docker build -t ${{ env.DOCKER_IMAGE }} .
 
       - name: 应用 U-Boot 补丁
-        run: |
-          if [ -f "patches/uboot-imx/charlies_board.patch" ]; then
-            cd third_party/uboot-imx
-            git apply --3way ../../patches/uboot-imx/charlies_board.patch || true
-            cd ../..
-          fi
+        run: cd third_party/uboot-imx && ../../scripts/apply_patches.sh uboot-imx
 
       - name: Cache ccache for U-Boot
         uses: actions/cache@v4
@@ -138,12 +133,7 @@ jobs:
         run: cd docker && docker build -t ${{ env.DOCKER_IMAGE }} .
 
       - name: 应用 Linux NXP BSP 补丁
-        run: |
-          if [ -f "patches/linux-imx/linux-imx-latest.patch" ]; then
-            cd third_party/linux-imx
-            git apply --3way ../../patches/linux-imx/linux-imx-latest.patch || true
-            cd ../..
-          fi
+        run: cd third_party/linux-imx && ../../scripts/apply_patches.sh linux-imx
 
       - name: Cache ccache for Linux NXP BSP
         uses: actions/cache@v4
@@ -208,12 +198,7 @@ jobs:
         run: cd docker && docker build -t ${{ env.DOCKER_IMAGE }} .
 
       - name: 应用 Linux Mainline 补丁
-        run: |
-          if [ -f "patches/linux_mainline/linux_mainline-feat-imx6ull_patches-20260322.patch" ]; then
-            cd third_party/linux_mainline
-            git apply --3way ../../patches/linux_mainline/linux_mainline-feat-imx6ull_patches-20260322.patch || true
-            cd ../..
-          fi
+        run: cd third_party/linux_mainline && ../../scripts/apply_patches.sh linux_mainline
 
       - name: Cache ccache for Linux Mainline
         uses: actions/cache@v4
@@ -323,7 +308,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: detect
     if: needs.detect.outputs.driver == 'true'
-    timeout-minutes: 8
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -332,8 +317,63 @@ jobs:
       - name: 初始化 linux-mainline 子模块
         run: git submodule update --init --depth=1 third_party/linux_mainline
 
+      - name: 应用 Linux Mainline 补丁
+        run: cd third_party/linux_mainline && ../../scripts/apply_patches.sh linux_mainline
+
       - name: 构建 Docker 镜像
         run: cd docker && docker build -t ${{ env.DOCKER_IMAGE }} .
+
+      - name: Cache ccache for Drivers
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-linux-mainline-${{ github.base_ref || github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-linux-mainline-
+
+      - name: 验证工具链
+        run: |
+          docker run --rm \
+            --user root \
+            -v $PWD:/workspace \
+            -w /workspace \
+            ${{ env.DOCKER_IMAGE }} \
+            bash -c "
+              echo '=== 环境信息 ==='
+              echo 'PATH: $PATH'
+              echo 'ARCH: $ARCH'
+              echo 'CROSS_COMPILE: $CROSS_COMPILE'
+              echo ''
+              echo '=== 工具链检查 ==='
+              which make && make --version | head -1
+              which arm-none-linux-gnueabihf-gcc && arm-none-linux-gnueabihf-gcc --version | head -1
+              echo ''
+              echo '=== 内核源码检查 ==='
+              ls -la third_party/linux_mainline/Makefile
+              ls -la third_party/linux_mainline/arch/arm/configs/imx_aes_mainline_defconfig
+            "
+
+      - name: 准备内核环境
+        run: |
+          docker run --rm \
+            --user root \
+            -v $PWD:/workspace \
+            -w /workspace \
+            -e CCACHE_DIR=/workspace/.ccache \
+            -e CCACHE_BASEDIR=/workspace \
+            -e CCACHE_NOHASHDIR=true \
+            -e CCACHE_COMPILERCHECK=content \
+            ${{ env.DOCKER_IMAGE }} \
+            bash -c '
+              ccache -M 2G && ccache -z
+              mkdir -p /workspace/ccache-bin
+              ln -sf /usr/bin/ccache /workspace/ccache-bin/arm-none-linux-gnueabihf-gcc
+              ln -sf /usr/bin/ccache /workspace/ccache-bin/arm-none-linux-gnueabihf-g++
+              ln -sf /usr/bin/ccache /workspace/ccache-bin/arm-none-linux-gnueabihf-ar
+              export PATH="/workspace/ccache-bin:${PATH}"
+              ./scripts/build_helper/build-mainline-linux.sh --fast-build
+              ccache -s
+            '
 
       - name: 构建所有驱动
         run: |
@@ -341,8 +381,22 @@ jobs:
             --user root \
             -v $PWD:/workspace \
             -w /workspace \
+            -e CCACHE_DIR=/workspace/.ccache \
+            -e CCACHE_BASEDIR=/workspace \
+            -e CCACHE_NOHASHDIR=true \
+            -e CCACHE_COMPILERCHECK=content \
             ${{ env.DOCKER_IMAGE }} \
-            bash -c "./scripts/driver_helper/build_driver.sh --all || true"
+            bash -c '
+              set -e
+              ccache -M 2G && ccache -z
+              mkdir -p /workspace/ccache-bin
+              ln -sf /usr/bin/ccache /workspace/ccache-bin/arm-none-linux-gnueabihf-gcc
+              ln -sf /usr/bin/ccache /workspace/ccache-bin/arm-none-linux-gnueabihf-g++
+              ln -sf /usr/bin/ccache /workspace/ccache-bin/arm-none-linux-gnueabihf-ar
+              export PATH="/workspace/ccache-bin:${PATH}"
+              ./scripts/driver_helper/build_driver.sh --all
+              ccache -s
+            '
 
       - name: 验证驱动产物
         run: |
@@ -363,7 +417,7 @@ jobs:
         with:
           script: |
             const needs = ${{ toJson(needs) }};
-            const jobs = ['uboot', 'linux-imx', 'linux-mainline', 'busybox', 'drivers'];
+            const jobs = ['U-Boot', 'Linux (NXP BSP)', 'Linux (Mainline)', 'BusyBox', 'Drivers'];
 
             // 检查是否有任何构建失败
             let hasFailures = false;
@@ -395,12 +449,18 @@ jobs:
             }
 
             // 向 GitHub Status API 报告状态
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: context.sha,
-              state: state,
-              context: 'Component Build',
-              description: description,
-              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
-            });
+            try {
+              const status = await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: context.sha,
+                state: state,
+                context: 'Component Build',
+                description: description,
+                target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              });
+              console.log('Status created:', status.data);
+            } catch (error) {
+              console.error('Failed to create status:', error);
+              throw error;
+            }

@@ -80,13 +80,16 @@ ensure_kernel_configured() {
 
     # 配置内核
     cd "$kdir"
-    make O="$kobj" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" "$defconfig" >/dev/null 2>&1
-
-    if [[ $? -eq 0 ]]; then
+    if make O="$kobj" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" "$defconfig" >/dev/null 2>&1; then
         log_info "✓ 内核配置完成"
         return 0
     else
         log_error "内核配置失败"
+        log_error "命令: make O=$kobj ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE $defconfig"
+        log_error "内核目录: $kdir"
+        log_error "defconfig: $defconfig"
+        # 重新运行以显示详细错误
+        make O="$kobj" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" "$defconfig" 2>&1 | tail -20 || true
         return 1
     fi
 }
@@ -117,10 +120,9 @@ check_kernel_built() {
         missing_files+=("autoconf.h")
     fi
 
-    # 检查modules_prepare标记文件
+    # 检查Module.symvers（编译驱动需要内核导出的符号信息）
     if [[ ! -f "${kobj}/Module.symvers" ]]; then
-        # Module.symvers是modules_prepare的标记文件
-        missing_files+=("Module.symvers (需要运行 modules_prepare)")
+        missing_files+=("Module.symvers (需要编译内核 vmlinux)")
     fi
 
     # 检查编译产物（选择性地检查，避免强制完整编译）
