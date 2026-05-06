@@ -2,6 +2,7 @@ name: PR Quick Checks
 
 on:
   pull_request:
+  push:
     branches: [main]
   workflow_dispatch:
 
@@ -128,3 +129,4 @@ jobs:
               console.error('Failed to create status:', error);
               throw error;
             }
+# TEST: pr-status-report workflow verification - Wed May  6 11:05:11 CST 2026
