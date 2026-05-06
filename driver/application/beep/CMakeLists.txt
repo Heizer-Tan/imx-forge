@@ -4,9 +4,9 @@ project(beep
     VERSION 0.1.0
     LANGUAGES C)
 
-option(BUILD_TESTING "Build test programs" ON)
+option(BUILD_TESTING "Build beep control programs" ON)
 
-add_executable(beep beep_test.c)
+add_executable(beep beep_control.c)
 
 if(BUILD_TESTING)
     enable_testing()

@@ -40,16 +40,16 @@ static ssize_t beep_write(struct file *filp, const char __user *buf,
                           size_t count, loff_t *ppos)
 {
     struct beep_dev *dev = filp->private_data;
-    
+
     if (!dev) {
-        return -EINVAL;
+        return -ENODEV;
     }
 
     if (count != 1) {
         return -EINVAL;
     }
-    
-    uint8_t val;
+
+    u8 val;
     if (copy_from_user(&val, buf, 1)) {
         return -EFAULT;
     }
@@ -88,23 +88,23 @@ static int beep_probe(struct platform_device *pdev)
     /* 1. 获取 GPIO（输出高电平初始化，蜂鸣器默认关闭） */
     dev->gpio = devm_gpiod_get(&pdev->dev, "beep", GPIOD_OUT_HIGH);
     if (IS_ERR(dev->gpio)) {
-        int ret = PTR_ERR(dev->gpio);
-        dev_err_probe(&pdev->dev, ret, "Failed to get beep GPIO\n");
-        return ret;
+        int err = PTR_ERR(dev->gpio);
+        dev_err_probe(&pdev->dev, err, "Failed to get beep GPIO\n");
+        return err;
     }
 
     /* 2. 动态分配设备号 */
-    int ret = alloc_chrdev_region(&dev->dev_num, 0, 1, BEEP_NAME);
-    if (ret < 0) {
+    int err = alloc_chrdev_region(&dev->dev_num, 0, 1, BEEP_NAME);
+    if (err < 0) {
         dev_err(&pdev->dev, "Failed to allocate device number\n");
-        return ret;
+        return err;
     }
 
     /* 3. 初始化并添加 cdev */
     cdev_init(&dev->cdev, &beep_fops);
     dev->cdev.owner = THIS_MODULE;
-    ret = cdev_add(&dev->cdev, dev->dev_num, 1);
-    if (ret < 0) {
+    err = cdev_add(&dev->cdev, dev->dev_num, 1);
+    if (err < 0) {
         dev_err(&pdev->dev, "Failed to add cdev\n");
         goto unregister_region;
     }
@@ -112,7 +112,7 @@ static int beep_probe(struct platform_device *pdev)
     /* 4. 创建类（新版内核仅需类名） */
     dev->class = class_create(BEEP_NAME);
     if (IS_ERR(dev->class)) {
-        ret = PTR_ERR(dev->class);
+        err = PTR_ERR(dev->class);
         dev_err(&pdev->dev, "Failed to create class\n");
         goto del_cdev;
     }
@@ -121,7 +121,7 @@ static int beep_probe(struct platform_device *pdev)
     dev->device = device_create(dev->class, NULL, dev->dev_num,
                                 NULL, BEEP_NAME);
     if (IS_ERR(dev->device)) {
-        ret = PTR_ERR(dev->device);
+        err = PTR_ERR(dev->device);
         dev_err(&pdev->dev, "Failed to create device\n");
         goto destroy_class;
     }
@@ -135,7 +135,7 @@ del_cdev:
     cdev_del(&dev->cdev);
 unregister_region:
     unregister_chrdev_region(dev->dev_num, 1);
-    return ret;
+    return err;
 }
 
 /* 平台驱动 remove 函数（新版内核返回 void） */
