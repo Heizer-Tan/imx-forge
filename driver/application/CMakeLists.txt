@@ -4,6 +4,9 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+# Enable testing (must be before project() or in subdirectories)
+enable_testing()
+
 # ================================================================
 # Build Options
 # ================================================================
