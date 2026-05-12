@@ -1,0 +1,5099 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="IMX-Forge，专注于IMX6ULL的教程文档网站">
+      
+      
+        <meta name="author" content="Charliechen114514">
+      
+      
+        <link rel="canonical" href="https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/05_time_management/">
+      
+      
+        <link rel="prev" href="../04_mutex_semaphore/">
+      
+      
+        <link rel="next" href="../06_timer_practice/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../Awesome-Embedded.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>从0开始理解Linux时间管理：jiffies到hrtimer的演进 - IMX-Forge的教程文档</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#从0开始理解linux时间管理jiffies到hrtimer的演进" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../../../.." title="IMX-Forge的教程文档" class="md-header__button md-logo" aria-label="IMX-Forge的教程文档" data-md-component="logo">
+      
+  <img src="../../../../Awesome-Embedded.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            IMX-Forge的教程文档
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              从0开始理解Linux时间管理：jiffies到hrtimer的演进
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  欢迎来到 IMX-Forge 教程文档
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../../QUICK_START/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  IMX-Forge 快速入门指南
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../ci/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Ci
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../development/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../logo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Logo
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../modules/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Modules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../scripts/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Scripts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../todo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Todo
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorial
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="IMX-Forge的教程文档" class="md-nav__button md-logo" aria-label="IMX-Forge的教程文档" data-md-component="logo">
+      
+  <img src="../../../../Awesome-Embedded.png" alt="logo">
+
+    </a>
+    IMX-Forge的教程文档
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    欢迎来到 IMX-Forge 教程文档
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IMX-Forge 快速入门指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../ci/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ci
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../development/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../logo/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logo
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../modules/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../scripts/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scripts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../todo/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Todo
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10" id="__nav_10_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../docker/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10_2" id="__nav_10_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Docker
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../docker/01_docker_basics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker 基础知识
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../docker/02_imx_forge_docker_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IMX-Forge Docker 开发指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../driver/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Driver
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10_3" id="__nav_10_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Driver
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../driver/00_chardev_base/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00 chardev base
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../driver/01_device_tree_base/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 device tree base
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../driver/02_pinctrl_gpio/01_introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 pinctrl gpio
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../driver/device_tree/01-Introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Device tree
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../driver/firmware_apply/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firmware apply
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../driver/modules/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10_4" id="__nav_10_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Kernel
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01_kernel_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始认识Linux内核：那个让无数嵌入式工程师又爱又恨的庞然大物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02_kernel_compile/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始编译Linux内核：当你发现make时少了一个包，第17次
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03_kernel_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始配置Linux内核：menuconfig不是黑魔法，只是有点绕
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04_kernel_modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    内核模块详解：从 Hello World 到设备驱动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05_kernel_device_tree/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设备树在内核中的使用：从硬件描述到驱动匹配
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06_wsl_network_boot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WSL2 + TFTP + 网络启动：那些年我们一起踩过的防火墙坑
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07_driver_basic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linux驱动开发入门：从Hello World到第一个字符驱动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08_kernel_boot_debug/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linux内核启动与调试：从bootargs到init进程的那几百万行代码
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_4_10" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_10_4_10" id="__nav_10_4_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core functional
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_10_4_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10_4_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core functional
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_concurrency_basics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始理解Linux内核并发：多核时代的生存法则
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_atomic_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    原子操作实战指南：Linux内核7.0最轻量的并发控制
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_spinlocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    自旋锁完整踩坑记录：为什么你的内核会死锁
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_mutex_semaphore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    信号量与互斥体：会睡觉的锁
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始理解Linux时间管理：jiffies到hrtimer的演进
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始理解Linux时间管理：jiffies到hrtimer的演进
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#前言内核中的时间是什么" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前言：内核中的时间是什么？
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#环境基于linux-70-rc4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境：基于Linux 7.0-rc4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jiffies内核的心跳" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jiffies：内核的心跳
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="jiffies：内核的心跳">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hz每秒的滴答数" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HZ：每秒的滴答数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jiffies的精度限制" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jiffies的精度限制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#时间单位转换" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        时间单位转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jiffies的回绕问题" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jiffies的回绕问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#内核定时器在指定时间执行回调" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        内核定时器：在指定时间执行回调
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="内核定时器：在指定时间执行回调">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#定时器的结构" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定时器的结构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-70的重大变化" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux 7.0的重大变化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#新的定时器api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新的定时器API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#定时器标志" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定时器标志
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#定时器示例" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定时器示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#旧api-vs-新api对比" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        旧API vs 新API对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#高精度定时器hrtimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高精度定时器：hrtimer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="高精度定时器：hrtimer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hrtimer的特点" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hrtimer的特点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hrtimer-api简介" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hrtimer API（简介）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#短延迟忙等待" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        短延迟：忙等待
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#睡眠延迟让出cpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        睡眠延迟：让出CPU
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="睡眠延迟：让出CPU">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#可中断睡眠" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        可中断睡眠
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usleep_range推荐的选择" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        usleep_range：推荐的选择
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#等待事件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        等待事件
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#实战在驱动中使用定时器" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实战：在驱动中使用定时器
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实战：在驱动中使用定时器">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#场景led闪烁驱动" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        场景：LED闪烁驱动
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#时间管理决策树" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        时间管理决策树
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#这一小节就到这里" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        这一小节就到这里
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#本章要点" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要点
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06_timer_practice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linux 7.0内核定时器实战指南：从timer_setup到完整驱动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07_interrupt_basics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linux 7.0中断机制完整指南：从request_irq到线程化中断
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08_interrupt_practice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    中断驱动实战指南：按键消抖到完整设备驱动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09_blocking_io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    阻塞I/O实战指南：让进程正确睡觉的艺术
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10_nonblocking_io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非阻塞I/O与轮询：从select到epoll的演进
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11_async_notification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    异步通知实战指南：让硬件主动找你
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../mainline/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mainline
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../practical/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Practical
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10_5" id="__nav_10_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Practical
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../practical/01_practical_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实战项目概述：我们要一起构建一个可用的 i.MX6ULL 系统
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../practical/02_build_system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从零构建完整系统：U-Boot、Linux 内核与 BusyBox Rootfs 的整合艺术
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../practical/03_boot_and_debug/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    系统启动与调试：见证系统启动的那一刻，并学会如何挽救它
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../practical/04-nfs-experience/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFS rootfs 多版本切换：用 bind mount 解决嵌入式开发痛点
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../rootfs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rootfs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10_6" id="__nav_10_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Rootfs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rootfs/01_rootfs_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rootfs 概述：Linux 系统的"最后一公里"，以及为什么内核启动后还需要它
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rootfs/02_busybox_compile/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BusyBox 编译安装：一把瑞士军刀的自制指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rootfs/03_inittab_init/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    inittab 与 init 系统：Linux 启动的"第一号进程"全解析
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rootfs/04_rootfs_structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rootfs 目录结构创建：Linux 文件系统的"骨架"
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rootfs/05_nfs_wsl_troubleshoot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WSL + NFS 网络启动踩坑记：从挂载失败到成功启动的完整历程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rootfs/06_apps_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    应用集成：从最小化 Rootfs 到可用系统
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../start/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10_7" id="__nav_10_7_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Start
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../start/01_start_from_toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从 0 开始构建嵌入式 Linux 开发环境（Part 1）
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../start/02_env_init_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    环境初始化指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../third_party/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Third party
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Third party
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_9" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../uboot/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uboot
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_10_9" id="__nav_10_9_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Uboot
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/01_what_is_uboot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始理解 U-Boot：嵌入式系统的"第一道门"，以及我们为什么终于告别了硬编码时代
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/02_uboot_compile/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从0开始编译 U-Boot：那些教程没告诉你的交叉编译原理和踩坑记录
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/03_uboot_porting_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    U-Boot完全移植概览：从官方源码到你的自制板，这条路有多远
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/04_board_config_basic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    板级配置基础：Kconfig系统的那些坑和我们的第一次移植
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/05_device_tree_basics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设备树基础：从硬编码噩梦到硬件描述分离
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/06_lcd_porting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第06章 LCD驱动移植
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/07_network_porting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第07章 网络驱动移植：从ping不通到tftp成功，那些让你抓狂的PHY时序问题
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/08_logo_splash/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第08章 Logo和启动画面
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/09_debugging_commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2026正点原子开发板移植（UBoot篇完结）：U-Boot调试命令：命令行是嵌入式开发的神器
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uboot/bonus_qa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    附录：常见问题解答（Q&amp;A）
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#前言内核中的时间是什么" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前言：内核中的时间是什么？
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#环境基于linux-70-rc4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境：基于Linux 7.0-rc4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jiffies内核的心跳" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jiffies：内核的心跳
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="jiffies：内核的心跳">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hz每秒的滴答数" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HZ：每秒的滴答数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jiffies的精度限制" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jiffies的精度限制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#时间单位转换" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        时间单位转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jiffies的回绕问题" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jiffies的回绕问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#内核定时器在指定时间执行回调" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        内核定时器：在指定时间执行回调
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="内核定时器：在指定时间执行回调">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#定时器的结构" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定时器的结构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-70的重大变化" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux 7.0的重大变化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#新的定时器api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新的定时器API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#定时器标志" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定时器标志
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#定时器示例" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定时器示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#旧api-vs-新api对比" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        旧API vs 新API对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#高精度定时器hrtimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高精度定时器：hrtimer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="高精度定时器：hrtimer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hrtimer的特点" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hrtimer的特点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hrtimer-api简介" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hrtimer API（简介）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#短延迟忙等待" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        短延迟：忙等待
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#睡眠延迟让出cpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        睡眠延迟：让出CPU
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="睡眠延迟：让出CPU">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#可中断睡眠" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        可中断睡眠
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usleep_range推荐的选择" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        usleep_range：推荐的选择
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#等待事件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        等待事件
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#实战在驱动中使用定时器" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实战：在驱动中使用定时器
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实战：在驱动中使用定时器">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#场景led闪烁驱动" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        场景：LED闪烁驱动
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#时间管理决策树" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        时间管理决策树
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#这一小节就到这里" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        这一小节就到这里
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#本章要点" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要点
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="导航栏" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../../../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    欢迎来到 IMX-Forge 教程文档
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Tutorial
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Kernel
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../01_concurrency_basics/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Core functional
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="从0开始理解linux时间管理jiffies到hrtimer的演进">从0开始理解Linux时间管理：jiffies到hrtimer的演进<a class="headerlink" href="#从0开始理解linux时间管理jiffies到hrtimer的演进" title="链接到此章节">&para;</a></h1>
+<h2 id="前言内核中的时间是什么">前言：内核中的时间是什么？<a class="headerlink" href="#前言内核中的时间是什么" title="链接到此章节">&para;</a></h2>
+<p>在用户空间编程时，我们习惯了用<code>sleep()</code>、<code>usleep()</code>这样的函数来等待，或者用<code>gettimeofday()</code>来获取当前时间。但在内核里，这些都不能用。</p>
+<p>为什么？</p>
+<p>因为内核是整个系统的管理者，它需要更高精度、更低开销的时间管理机制。而且，内核中的时间管理涉及到底层的硬件定时器、调度器、中断处理，比用户空间复杂得多。</p>
+<p>老实说，我刚开始写内核驱动的时候，对时间管理一窍不通。我以为直接调用个<code>delay()</code>就行，结果编译都过不了。后来我花了很长时间才理解：<strong>内核中的时间管理是一套完整的体系，从硬件定时器到软件定时器，层层抽象。</strong></p>
+<p>这一节，我们从最基础的<code>jiffies</code>开始，逐步理解内核是如何管理时间的。</p>
+<h2 id="环境基于linux-70-rc4">环境：基于Linux 7.0-rc4<a class="headerlink" href="#环境基于linux-70-rc4" title="链接到此章节">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>版本/信息</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内核版本</td>
+<td>Linux 7.0-rc4 (主线内核)</td>
+</tr>
+<tr>
+<td>架构</td>
+<td>ARMv7-A (Cortex-A7)</td>
+</tr>
+<tr>
+<td>相关头文件</td>
+<td><code>include/linux/jiffies.h</code>, <code>include/linux/timer.h</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="jiffies内核的心跳">jiffies：内核的心跳<a class="headerlink" href="#jiffies内核的心跳" title="链接到此章节">&para;</a></h2>
+<p>内核中有一个全局变量，叫<code>jiffies</code>。它记录了系统启动以来经过的「滴答数」。</p>
+<p>你可以把它理解为内核的「心跳计数器」。每隔一段时间（这个间隔由<code>HZ</code>决定），硬件定时器会产生一个中断，<code>jiffies</code>就会加1。</p>
+<h3 id="hz每秒的滴答数">HZ：每秒的滴答数<a class="headerlink" href="#hz每秒的滴答数" title="链接到此章节">&para;</a></h3>
+<p><code>HZ</code>是一个宏定义，表示每秒有多少次滴答。在我们的ARM Linux系统中，通常<code>HZ=100</code>或<code>HZ=200</code>。</p>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><a href="#__codelineno-0-1"><span class="linenos" data-linenos="1 "></span></a><span class="cm">/* 常见的HZ值 */</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a><a href="#__codelineno-0-2"><span class="linenos" data-linenos="2 "></span></a><span class="cp">#define HZ 100  </span><span class="cm">/* 每秒100次滴答，即每10ms一次 */</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><a href="#__codelineno-0-3"><span class="linenos" data-linenos="3 "></span></a><span class="cp">#define HZ 200  </span><span class="cm">/* 每秒200次滴答，即每5ms一次 */</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4"></a><a href="#__codelineno-0-4"><span class="linenos" data-linenos="4 "></span></a><span class="cp">#define HZ 1000 </span><span class="cm">/* 每秒1000次滴答，即每1ms一次 */</span>
+</span></code></pre></div>
+<p><strong>为什么不能无限提高HZ？</strong></p>
+<p>HZ越高，时间精度越高，但开销也越大：
+* 更多的定时器中断
+* 更频繁的调度器运行
+* 更多的功耗</p>
+<h3 id="jiffies的精度限制">jiffies的精度限制<a class="headerlink" href="#jiffies的精度限制" title="链接到此章节">&para;</a></h3>
+<p>由于<code>jiffies</code>是基于滴答数的，它的精度受限于HZ值。</p>
+<table>
+<thead>
+<tr>
+<th>HZ</th>
+<th>滴答间隔</th>
+<th>精度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>10ms</td>
+<td>10ms</td>
+</tr>
+<tr>
+<td>200</td>
+<td>5ms</td>
+<td>5ms</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>1ms</td>
+<td>1ms</td>
+</tr>
+</tbody>
+</table>
+<p>如果你的应用需要微秒级的精度，<code>jiffies</code>就不够用了。这时候需要用高精度定时器（hrtimer）。</p>
+<h3 id="时间单位转换">时间单位转换<a class="headerlink" href="#时间单位转换" title="链接到此章节">&para;</a></h3>
+<p>内核提供了一组宏来转换时间单位：</p>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1"></a><a href="#__codelineno-1-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/jiffies.h&gt;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a><a href="#__codelineno-1-2"><span class="linenos" data-linenos=" 2 "></span></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a><a href="#__codelineno-1-3"><span class="linenos" data-linenos=" 3 "></span></a><span class="cm">/* 毫秒转jiffies */</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4"></a><a href="#__codelineno-1-4"><span class="linenos" data-linenos=" 4 "></span></a><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="cm">/* 100ms */</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5"></a><a href="#__codelineno-1-5"><span class="linenos" data-linenos=" 5 "></span></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6"></a><a href="#__codelineno-1-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="cm">/* 秒转jiffies */</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7"></a><a href="#__codelineno-1-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span><span class="w">  </span><span class="cm">/* 1秒 */</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8"></a><a href="#__codelineno-1-8"><span class="linenos" data-linenos=" 8 "></span></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9"></a><a href="#__codelineno-1-9"><span class="linenos" data-linenos=" 9 "></span></a><span class="cm">/* 微秒转jiffies（注意精度损失） */</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10"></a><a href="#__codelineno-1-10"><span class="linenos" data-linenos="10 "></span></a><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">usecs_to_jiffies</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span><span class="w">  </span><span class="cm">/* 1ms */</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11"></a><a href="#__codelineno-1-11"><span class="linenos" data-linenos="11 "></span></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12"></a><a href="#__codelineno-1-12"><span class="linenos" data-linenos="12 "></span></a><span class="cm">/* jiffies转毫秒（用于打印） */</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13"></a><a href="#__codelineno-1-13"><span class="linenos" data-linenos="13 "></span></a><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jiffies_to_msecs</span><span class="p">(</span><span class="n">j</span><span class="p">);</span>
+</span></code></pre></div>
+<h3 id="jiffies的回绕问题">jiffies的回绕问题<a class="headerlink" href="#jiffies的回绕问题" title="链接到此章节">&para;</a></h3>
+<p><code>jiffies</code>是一个32位或64位的无符号整数。当它达到最大值后，会回绕到0。</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1"></a><a href="#__codelineno-2-1"><span class="linenos" data-linenos="1 "></span></a>32位jiffies：
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2"></a><a href="#__codelineno-2-2"><span class="linenos" data-linenos="2 "></span></a>0xFFFFFFFF → 0x00000000
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3"></a><a href="#__codelineno-2-3"><span class="linenos" data-linenos="3 "></span></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4"></a><a href="#__codelineno-2-4"><span class="linenos" data-linenos="4 "></span></a>大约每49.7天回绕一次（HZ=100时）
+</span></code></pre></div>
+<p><strong>这就是问题</strong>：如果你直接比较两个<code>jiffies</code>值，可能会在回绕时出错。</p>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1"></a><a href="#__codelineno-3-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="cm">/* ❌ 错误的比较方式 */</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2"></a><a href="#__codelineno-3-2"><span class="linenos" data-linenos=" 2 "></span></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">timeout</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">jiffies</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3"></a><a href="#__codelineno-3-3"><span class="linenos" data-linenos=" 3 "></span></a><span class="w">    </span><span class="cm">/* 在回绕时，这个判断会出错！ */</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4"></a><a href="#__codelineno-3-4"><span class="linenos" data-linenos=" 4 "></span></a><span class="p">}</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5"></a><a href="#__codelineno-3-5"><span class="linenos" data-linenos=" 5 "></span></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6"></a><a href="#__codelineno-3-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="cm">/* ✓ 正确的比较方式 */</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7"></a><a href="#__codelineno-3-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">time_after</span><span class="p">(</span><span class="n">jiffies</span><span class="p">,</span><span class="w"> </span><span class="n">timeout</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8"></a><a href="#__codelineno-3-8"><span class="linenos" data-linenos=" 8 "></span></a><span class="w">    </span><span class="cm">/* 这个宏正确处理了回绕 */</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9"></a><a href="#__codelineno-3-9"><span class="linenos" data-linenos=" 9 "></span></a><span class="p">}</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10"></a><a href="#__codelineno-3-10"><span class="linenos" data-linenos="10 "></span></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11"></a><a href="#__codelineno-3-11"><span class="linenos" data-linenos="11 "></span></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">time_before</span><span class="p">(</span><span class="n">jiffies</span><span class="p">,</span><span class="w"> </span><span class="n">timeout</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12"></a><a href="#__codelineno-3-12"><span class="linenos" data-linenos="12 "></span></a><span class="w">    </span><span class="cm">/* 同样正确 */</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13"></a><a href="#__codelineno-3-13"><span class="linenos" data-linenos="13 "></span></a><span class="p">}</span>
+</span></code></pre></div>
+<p><strong>时间比较宏</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>宏</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>time_after(a, b)</code></td>
+<td><code>a &gt; b</code>（正确处理回绕）</td>
+</tr>
+<tr>
+<td><code>time_before(a, b)</code></td>
+<td><code>a &lt; b</code>（正确处理回绕）</td>
+</tr>
+<tr>
+<td><code>time_after_eq(a, b)</code></td>
+<td><code>a &gt;= b</code></td>
+</tr>
+<tr>
+<td><code>time_before_eq(a, b)</code></td>
+<td><code>a &lt;= b</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="内核定时器在指定时间执行回调">内核定时器：在指定时间执行回调<a class="headerlink" href="#内核定时器在指定时间执行回调" title="链接到此章节">&para;</a></h2>
+<p>内核定时器是内核中最常用的延时执行机制。它允许你在指定的时间后执行一个回调函数。</p>
+<h3 id="定时器的结构">定时器的结构<a class="headerlink" href="#定时器的结构" title="链接到此章节">&para;</a></h3>
+<p>在Linux 7.0中，定时器用<code>timer_list</code>结构体表示：</p>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1"></a><a href="#__codelineno-4-1"><span class="linenos" data-linenos="1 "></span></a><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2"></a><a href="#__codelineno-4-2"><span class="linenos" data-linenos="2 "></span></a><span class="w">    </span><span class="cm">/* 内部字段 */</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3"></a><a href="#__codelineno-4-3"><span class="linenos" data-linenos="3 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">hlist_node</span><span class="w"> </span><span class="n">entry</span><span class="p">;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4"></a><a href="#__codelineno-4-4"><span class="linenos" data-linenos="4 "></span></a><span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">expires</span><span class="p">;</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5"></a><a href="#__codelineno-4-5"><span class="linenos" data-linenos="5 "></span></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">function</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6"></a><a href="#__codelineno-4-6"><span class="linenos" data-linenos="6 "></span></a><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7"></a><a href="#__codelineno-4-7"><span class="linenos" data-linenos="7 "></span></a><span class="w">    </span><span class="cm">/* ... */</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8"></a><a href="#__codelineno-4-8"><span class="linenos" data-linenos="8 "></span></a><span class="p">};</span>
+</span></code></pre></div>
+<h3 id="linux-70的重大变化">Linux 7.0的重大变化<a class="headerlink" href="#linux-70的重大变化" title="链接到此章节">&para;</a></h3>
+<p><strong>⚠️ 重要</strong>：如果你有旧的4.x内核代码，需要注意以下变化：</p>
+<ol>
+<li><strong><code>init_timer()</code>已废弃</strong>，必须使用<code>timer_setup()</code></li>
+<li><strong><code>data</code>字段已移除</strong>，必须使用<code>from_timer()</code>宏获取包含结构体</li>
+<li><strong><code>del_timer_sync()</code>被<code>timer_delete_sync()</code>替代</strong>（虽然旧名字仍可用）</li>
+</ol>
+<h3 id="新的定时器api">新的定时器API<a class="headerlink" href="#新的定时器api" title="链接到此章节">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>timer_setup(timer, callback, flags)</code></td>
+<td>初始化定时器</td>
+</tr>
+<tr>
+<td><code>void (*callback)(struct timer_list *)</code></td>
+<td>定时器回调函数签名</td>
+</tr>
+<tr>
+<td><code>add_timer(timer)</code></td>
+<td>激活定时器</td>
+</tr>
+<tr>
+<td><code>mod_timer(timer, expires)</code></td>
+<td>修改定时器的过期时间</td>
+</tr>
+<tr>
+<td><code>timer_delete(timer)</code></td>
+<td>删除定时器（可能返回还在运行）</td>
+</tr>
+<tr>
+<td><code>timer_delete_sync(timer)</code></td>
+<td>删除定时器并等待回调完成</td>
+</tr>
+<tr>
+<td><code>timer_pending(timer)</code></td>
+<td>检测定时器是否 pending</td>
+</tr>
+</tbody>
+</table>
+<h3 id="定时器标志">定时器标志<a class="headerlink" href="#定时器标志" title="链接到此章节">&para;</a></h3>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1"></a><a href="#__codelineno-5-1"><span class="linenos" data-linenos="1 "></span></a><span class="cp">#define TIMER_DEFERRABLE  0x00080000  </span><span class="cm">/* 可延迟定时器 */</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2"></a><a href="#__codelineno-5-2"><span class="linenos" data-linenos="2 "></span></a><span class="cp">#define TIMER_PINNED      0x00100000  </span><span class="cm">/* 固定在当前CPU */</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3"></a><a href="#__codelineno-5-3"><span class="linenos" data-linenos="3 "></span></a><span class="cp">#define TIMER_IRQSAFE     0x00200000  </span><span class="cm">/* 中断安全定时器 */</span>
+</span></code></pre></div>
+<ul>
+<li><strong>TIMER_DEFERRABLE</strong>：系统空闲时不会唤醒CPU</li>
+<li><strong>TIMER_PINNED</strong>：定时器总是在指定的CPU上执行</li>
+<li><strong>TIMER_IRQSAFE</strong>：回调在中断关闭的情况下执行</li>
+</ul>
+<h3 id="定时器示例">定时器示例<a class="headerlink" href="#定时器示例" title="链接到此章节">&para;</a></h3>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1"></a><a href="#__codelineno-6-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/timer.h&gt;</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2"></a><a href="#__codelineno-6-2"><span class="linenos" data-linenos=" 2 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/jiffies.h&gt;</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3"></a><a href="#__codelineno-6-3"><span class="linenos" data-linenos=" 3 "></span></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4"></a><a href="#__codelineno-6-4"><span class="linenos" data-linenos=" 4 "></span></a><span class="k">struct</span><span class="w"> </span><span class="nc">my_device</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5"></a><a href="#__codelineno-6-5"><span class="linenos" data-linenos=" 5 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="n">timer</span><span class="p">;</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6"></a><a href="#__codelineno-6-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">counter</span><span class="p">;</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7"></a><a href="#__codelineno-6-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="w">    </span><span class="cm">/* ... 其他成员 ... */</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8"></a><a href="#__codelineno-6-8"><span class="linenos" data-linenos=" 8 "></span></a><span class="p">};</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9"></a><a href="#__codelineno-6-9"><span class="linenos" data-linenos=" 9 "></span></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10"></a><a href="#__codelineno-6-10"><span class="linenos" data-linenos="10 "></span></a><span class="cm">/* 定时器回调函数 */</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11"></a><a href="#__codelineno-6-11"><span class="linenos" data-linenos="11 "></span></a><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">my_timer_callback</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">)</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12"></a><a href="#__codelineno-6-12"><span class="linenos" data-linenos="12 "></span></a><span class="p">{</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13"></a><a href="#__codelineno-6-13"><span class="linenos" data-linenos="13 "></span></a><span class="w">    </span><span class="cm">/* 使用container_of或from_timer获取包含结构体 */</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14"></a><a href="#__codelineno-6-14"><span class="linenos" data-linenos="14 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">my_device</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">from_timer</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15"></a><a href="#__codelineno-6-15"><span class="linenos" data-linenos="15 "></span></a>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16"></a><a href="#__codelineno-6-16"><span class="linenos" data-linenos="16 "></span></a><span class="w">    </span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">counter</span><span class="o">++</span><span class="p">;</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17"></a><a href="#__codelineno-6-17"><span class="linenos" data-linenos="17 "></span></a><span class="w">    </span><span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Timer fired, counter = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">counter</span><span class="p">);</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18"></a><a href="#__codelineno-6-18"><span class="linenos" data-linenos="18 "></span></a>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19"></a><a href="#__codelineno-6-19"><span class="linenos" data-linenos="19 "></span></a><span class="w">    </span><span class="cm">/* 如果需要周期性执行，重新设置定时器 */</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20"></a><a href="#__codelineno-6-20"><span class="linenos" data-linenos="20 "></span></a><span class="w">    </span><span class="n">mod_timer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="n">jiffies</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="mi">1000</span><span class="p">));</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21"></a><a href="#__codelineno-6-21"><span class="linenos" data-linenos="21 "></span></a><span class="p">}</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22"></a><a href="#__codelineno-6-22"><span class="linenos" data-linenos="22 "></span></a>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23"></a><a href="#__codelineno-6-23"><span class="linenos" data-linenos="23 "></span></a><span class="cm">/* 初始化定时器 */</span>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24"></a><a href="#__codelineno-6-24"><span class="linenos" data-linenos="24 "></span></a><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">my_device_init</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">my_device</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="p">)</span>
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25"></a><a href="#__codelineno-6-25"><span class="linenos" data-linenos="25 "></span></a><span class="p">{</span>
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26"></a><a href="#__codelineno-6-26"><span class="linenos" data-linenos="26 "></span></a><span class="w">    </span><span class="cm">/* ✓ Linux 7.0的正确方式 */</span>
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27"></a><a href="#__codelineno-6-27"><span class="linenos" data-linenos="27 "></span></a><span class="w">    </span><span class="n">timer_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="n">my_timer_callback</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28"></a><a href="#__codelineno-6-28"><span class="linenos" data-linenos="28 "></span></a>
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29"></a><a href="#__codelineno-6-29"><span class="linenos" data-linenos="29 "></span></a><span class="w">    </span><span class="cm">/* 设置1秒后过期 */</span>
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30"></a><a href="#__codelineno-6-30"><span class="linenos" data-linenos="30 "></span></a><span class="w">    </span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">.</span><span class="n">expires</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jiffies</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31"></a><a href="#__codelineno-6-31"><span class="linenos" data-linenos="31 "></span></a>
+</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32"></a><a href="#__codelineno-6-32"><span class="linenos" data-linenos="32 "></span></a><span class="w">    </span><span class="cm">/* 激活定时器 */</span>
+</span><span id="__span-6-33"><a id="__codelineno-6-33" name="__codelineno-6-33"></a><a href="#__codelineno-6-33"><span class="linenos" data-linenos="33 "></span></a><span class="w">    </span><span class="n">add_timer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-6-34"><a id="__codelineno-6-34" name="__codelineno-6-34"></a><a href="#__codelineno-6-34"><span class="linenos" data-linenos="34 "></span></a>
+</span><span id="__span-6-35"><a id="__codelineno-6-35" name="__codelineno-6-35"></a><a href="#__codelineno-6-35"><span class="linenos" data-linenos="35 "></span></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-6-36"><a id="__codelineno-6-36" name="__codelineno-6-36"></a><a href="#__codelineno-6-36"><span class="linenos" data-linenos="36 "></span></a><span class="p">}</span>
+</span><span id="__span-6-37"><a id="__codelineno-6-37" name="__codelineno-6-37"></a><a href="#__codelineno-6-37"><span class="linenos" data-linenos="37 "></span></a>
+</span><span id="__span-6-38"><a id="__codelineno-6-38" name="__codelineno-6-38"></a><a href="#__codelineno-6-38"><span class="linenos" data-linenos="38 "></span></a><span class="cm">/* 清理定时器 */</span>
+</span><span id="__span-6-39"><a id="__codelineno-6-39" name="__codelineno-6-39"></a><a href="#__codelineno-6-39"><span class="linenos" data-linenos="39 "></span></a><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">my_device_cleanup</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">my_device</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="p">)</span>
+</span><span id="__span-6-40"><a id="__codelineno-6-40" name="__codelineno-6-40"></a><a href="#__codelineno-6-40"><span class="linenos" data-linenos="40 "></span></a><span class="p">{</span>
+</span><span id="__span-6-41"><a id="__codelineno-6-41" name="__codelineno-6-41"></a><a href="#__codelineno-6-41"><span class="linenos" data-linenos="41 "></span></a><span class="w">    </span><span class="cm">/* 删除定时器并等待回调完成 */</span>
+</span><span id="__span-6-42"><a id="__codelineno-6-42" name="__codelineno-6-42"></a><a href="#__codelineno-6-42"><span class="linenos" data-linenos="42 "></span></a><span class="w">    </span><span class="n">timer_delete_sync</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-6-43"><a id="__codelineno-6-43" name="__codelineno-6-43"></a><a href="#__codelineno-6-43"><span class="linenos" data-linenos="43 "></span></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="旧api-vs-新api对比">旧API vs 新API对比<a class="headerlink" href="#旧api-vs-新api对比" title="链接到此章节">&para;</a></h3>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1"></a><a href="#__codelineno-7-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="cm">/* ❌ 旧API（Linux 4.14之前） */</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2"></a><a href="#__codelineno-7-2"><span class="linenos" data-linenos=" 2 "></span></a><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="n">my_timer</span><span class="p">;</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3"></a><a href="#__codelineno-7-3"><span class="linenos" data-linenos=" 3 "></span></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4"></a><a href="#__codelineno-7-4"><span class="linenos" data-linenos=" 4 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5"></a><a href="#__codelineno-7-5"><span class="linenos" data-linenos=" 5 "></span></a><span class="p">{</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6"></a><a href="#__codelineno-7-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">my_device</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">my_device</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">;</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7"></a><a href="#__codelineno-7-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="w">    </span><span class="cm">/* ... */</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8"></a><a href="#__codelineno-7-8"><span class="linenos" data-linenos=" 8 "></span></a><span class="p">}</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9"></a><a href="#__codelineno-7-9"><span class="linenos" data-linenos=" 9 "></span></a>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10"></a><a href="#__codelineno-7-10"><span class="linenos" data-linenos="10 "></span></a><span class="n">init_timer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_timer</span><span class="p">);</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11"></a><a href="#__codelineno-7-11"><span class="linenos" data-linenos="11 "></span></a><span class="n">my_timer</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="p">)</span><span class="n">dev</span><span class="p">;</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12"></a><a href="#__codelineno-7-12"><span class="linenos" data-linenos="12 "></span></a><span class="n">my_timer</span><span class="p">.</span><span class="n">function</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13"></a><a href="#__codelineno-7-13"><span class="linenos" data-linenos="13 "></span></a><span class="n">my_timer</span><span class="p">.</span><span class="n">expires</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jiffies</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14"></a><a href="#__codelineno-7-14"><span class="linenos" data-linenos="14 "></span></a><span class="n">add_timer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_timer</span><span class="p">);</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15"></a><a href="#__codelineno-7-15"><span class="linenos" data-linenos="15 "></span></a>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16"></a><a href="#__codelineno-7-16"><span class="linenos" data-linenos="16 "></span></a><span class="cm">/* ✓ 新API（Linux 4.14+，包括7.0） */</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17"></a><a href="#__codelineno-7-17"><span class="linenos" data-linenos="17 "></span></a><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="n">my_timer</span><span class="p">;</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18"></a><a href="#__codelineno-7-18"><span class="linenos" data-linenos="18 "></span></a>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19"></a><a href="#__codelineno-7-19"><span class="linenos" data-linenos="19 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">)</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20"></a><a href="#__codelineno-7-20"><span class="linenos" data-linenos="20 "></span></a><span class="p">{</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21"></a><a href="#__codelineno-7-21"><span class="linenos" data-linenos="21 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">my_device</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">from_timer</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22"></a><a href="#__codelineno-7-22"><span class="linenos" data-linenos="22 "></span></a><span class="w">    </span><span class="cm">/* ... */</span>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23"></a><a href="#__codelineno-7-23"><span class="linenos" data-linenos="23 "></span></a><span class="p">}</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24"></a><a href="#__codelineno-7-24"><span class="linenos" data-linenos="24 "></span></a>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25"></a><a href="#__codelineno-7-25"><span class="linenos" data-linenos="25 "></span></a><span class="n">timer_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_timer</span><span class="p">,</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26"></a><a href="#__codelineno-7-26"><span class="linenos" data-linenos="26 "></span></a><span class="n">my_timer</span><span class="p">.</span><span class="n">expires</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jiffies</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27"></a><a href="#__codelineno-7-27"><span class="linenos" data-linenos="27 "></span></a><span class="n">add_timer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_timer</span><span class="p">);</span>
+</span></code></pre></div>
+<h2 id="高精度定时器hrtimer">高精度定时器：hrtimer<a class="headerlink" href="#高精度定时器hrtimer" title="链接到此章节">&para;</a></h2>
+<p>当你需要微秒甚至纳秒级的精度时，<code>jiffies</code>和<code>timer_list</code>就不够用了。这时候需要用高精度定时器（hrtimer）。</p>
+<h3 id="hrtimer的特点">hrtimer的特点<a class="headerlink" href="#hrtimer的特点" title="链接到此章节">&para;</a></h3>
+<ul>
+<li>纳秒级精度</li>
+<li>基于高精度硬件时钟（如ARM的定时器）</li>
+<li>不依赖HZ配置</li>
+</ul>
+<h3 id="hrtimer-api简介">hrtimer API（简介）<a class="headerlink" href="#hrtimer-api简介" title="链接到此章节">&para;</a></h3>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1"></a><a href="#__codelineno-8-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/hrtimer.h&gt;</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2"></a><a href="#__codelineno-8-2"><span class="linenos" data-linenos=" 2 "></span></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3"></a><a href="#__codelineno-8-3"><span class="linenos" data-linenos=" 3 "></span></a><span class="k">enum</span><span class="w"> </span><span class="n">hrtimer_restart</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">hrtimer</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4"></a><a href="#__codelineno-8-4"><span class="linenos" data-linenos=" 4 "></span></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5"></a><a href="#__codelineno-8-5"><span class="linenos" data-linenos=" 5 "></span></a><span class="k">struct</span><span class="w"> </span><span class="nc">hrtimer</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6"></a><a href="#__codelineno-8-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="w">    </span><span class="cm">/* ... */</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7"></a><a href="#__codelineno-8-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="p">};</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8"></a><a href="#__codelineno-8-8"><span class="linenos" data-linenos=" 8 "></span></a>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9"></a><a href="#__codelineno-8-9"><span class="linenos" data-linenos=" 9 "></span></a><span class="cm">/* 初始化hrtimer */</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10"></a><a href="#__codelineno-8-10"><span class="linenos" data-linenos="10 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">hrtimer_init</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">hrtimer</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="kt">clockid_t</span><span class="w"> </span><span class="n">clock_id</span><span class="p">,</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11"></a><a href="#__codelineno-8-11"><span class="linenos" data-linenos="11 "></span></a><span class="w">                 </span><span class="k">enum</span><span class="w"> </span><span class="n">hrtimer_mode</span><span class="w"> </span><span class="n">mode</span><span class="p">);</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12"></a><a href="#__codelineno-8-12"><span class="linenos" data-linenos="12 "></span></a>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13"></a><a href="#__codelineno-8-13"><span class="linenos" data-linenos="13 "></span></a><span class="cm">/* 启动hrtimer */</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14"></a><a href="#__codelineno-8-14"><span class="linenos" data-linenos="14 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">hrtimer_start</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">hrtimer</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="n">ktime_t</span><span class="w"> </span><span class="n">time</span><span class="p">,</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15"></a><a href="#__codelineno-8-15"><span class="linenos" data-linenos="15 "></span></a><span class="w">                  </span><span class="k">const</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="n">hrtimer_mode</span><span class="w"> </span><span class="n">mode</span><span class="p">);</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16"></a><a href="#__codelineno-8-16"><span class="linenos" data-linenos="16 "></span></a>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17"></a><a href="#__codelineno-8-17"><span class="linenos" data-linenos="17 "></span></a><span class="cm">/* 取消hrtimer */</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18"></a><a href="#__codelineno-8-18"><span class="linenos" data-linenos="18 "></span></a><span class="kt">int</span><span class="w"> </span><span class="nf">hrtimer_cancel</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">hrtimer</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">);</span>
+</span></code></pre></div>
+<p><strong>clock_id选项</strong>：</p>
+<ul>
+<li><code>CLOCK_MONOTONIC</code>：单调时钟，不受系统时间调整影响</li>
+<li><code>CLOCK_REALTIME</code>：实时时钟，可能被NTP调整</li>
+<li><code>CLOCK_BOOTTIME</code>：包含休眠时间的单调时钟</li>
+</ul>
+<p><strong>⚠️ 注意</strong>：hrtimer的使用比较复杂，通常驱动代码用<code>timer_list</code>就够了。只有在需要极高精度时才考虑hrtimer。</p>
+<h2 id="短延迟忙等待">短延迟：忙等待<a class="headerlink" href="#短延迟忙等待" title="链接到此章节">&para;</a></h2>
+<p>有时候，你需要极短的延迟（比如微秒级），而且不需要很精确。内核提供了一些忙等待函数：</p>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1"></a><a href="#__codelineno-9-1"><span class="linenos" data-linenos="1 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/delay.h&gt;</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2"></a><a href="#__codelineno-9-2"><span class="linenos" data-linenos="2 "></span></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3"></a><a href="#__codelineno-9-3"><span class="linenos" data-linenos="3 "></span></a><span class="cm">/* 忙等待指定的纳秒/微秒/毫秒数 */</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4"></a><a href="#__codelineno-9-4"><span class="linenos" data-linenos="4 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">ndelay</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">nsecs</span><span class="p">);</span><span class="w">  </span><span class="cm">/* 纳秒延迟 */</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5"></a><a href="#__codelineno-9-5"><span class="linenos" data-linenos="5 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">udelay</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">usecs</span><span class="p">);</span><span class="w">  </span><span class="cm">/* 微秒延迟 */</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6"></a><a href="#__codelineno-9-6"><span class="linenos" data-linenos="6 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">mdelay</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">msecs</span><span class="p">);</span><span class="w">  </span><span class="cm">/* 毫秒延迟 */</span>
+</span></code></pre></div>
+<p><strong>⚠️ 注意</strong>：</p>
+<ul>
+<li>这些函数会<strong>占用CPU</strong>，是忙等待</li>
+<li>只在极短延迟时使用（通常小于1ms）</li>
+<li>较长延迟应该用定时器或睡眠函数</li>
+</ul>
+<h2 id="睡眠延迟让出cpu">睡眠延迟：让出CPU<a class="headerlink" href="#睡眠延迟让出cpu" title="链接到此章节">&para;</a></h2>
+<p>如果你的延迟时间较长（毫秒级或更长），应该让出CPU，让其他进程运行。</p>
+<h3 id="可中断睡眠">可中断睡眠<a class="headerlink" href="#可中断睡眠" title="链接到此章节">&para;</a></h3>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1"></a><a href="#__codelineno-10-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/delay.h&gt;</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2"></a><a href="#__codelineno-10-2"><span class="linenos" data-linenos=" 2 "></span></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3"></a><a href="#__codelineno-10-3"><span class="linenos" data-linenos=" 3 "></span></a><span class="cm">/* 睡眠指定毫秒数（可被信号中断） */</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4"></a><a href="#__codelineno-10-4"><span class="linenos" data-linenos=" 4 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">msleep</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">msecs</span><span class="p">);</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5"></a><a href="#__codelineno-10-5"><span class="linenos" data-linenos=" 5 "></span></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6"></a><a href="#__codelineno-10-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="cm">/* 睡眠指定毫秒数（不可中断） */</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7"></a><a href="#__codelineno-10-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">msleep_interruptible</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">msecs</span><span class="p">);</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8"></a><a href="#__codelineno-10-8"><span class="linenos" data-linenos=" 8 "></span></a>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9"></a><a href="#__codelineno-10-9"><span class="linenos" data-linenos=" 9 "></span></a><span class="cm">/* 睡眠指定微秒数（上限2000us） */</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10"></a><a href="#__codelineno-10-10"><span class="linenos" data-linenos="10 "></span></a><span class="kt">void</span><span class="w"> </span><span class="nf">usleep_range</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">max</span><span class="p">);</span>
+</span></code></pre></div>
+<h3 id="usleep_range推荐的选择">usleep_range：推荐的选择<a class="headerlink" href="#usleep_range推荐的选择" title="链接到此章节">&para;</a></h3>
+<p><code>usleep_range()</code>是现代内核推荐的高精度睡眠函数：</p>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1"></a><a href="#__codelineno-11-1"><span class="linenos" data-linenos="1 "></span></a><span class="cm">/* 睡眠100-150微秒 */</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2"></a><a href="#__codelineno-11-2"><span class="linenos" data-linenos="2 "></span></a><span class="n">usleep_range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">150</span><span class="p">);</span>
+</span></code></pre></div>
+<p>它给出一个范围，让调度器可以在范围内选择最佳唤醒时间，有助于省电和减少调度开销。</p>
+<h3 id="等待事件">等待事件<a class="headerlink" href="#等待事件" title="链接到此章节">&para;</a></h3>
+<p>有时候，你需要等待某个条件成立，而不是固定的延迟。这时候用等待队列：</p>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1"></a><a href="#__codelineno-12-1"><span class="linenos" data-linenos="1 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/wait.h&gt;</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2"></a><a href="#__codelineno-12-2"><span class="linenos" data-linenos="2 "></span></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3"></a><a href="#__codelineno-12-3"><span class="linenos" data-linenos="3 "></span></a><span class="cm">/* 等待条件成立，超时时间为jiffies */</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4"></a><a href="#__codelineno-12-4"><span class="linenos" data-linenos="4 "></span></a><span class="n">wait_event_timeout</span><span class="p">(</span><span class="n">wait_queue_head_t</span><span class="w"> </span><span class="n">wq</span><span class="p">,</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5"></a><a href="#__codelineno-12-5"><span class="linenos" data-linenos="5 "></span></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6"></a><a href="#__codelineno-12-6"><span class="linenos" data-linenos="6 "></span></a><span class="cm">/* 可中断版本 */</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7"></a><a href="#__codelineno-12-7"><span class="linenos" data-linenos="7 "></span></a><span class="n">wait_event_interruptible_timeout</span><span class="p">(</span><span class="n">wq</span><span class="p">,</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+</span></code></pre></div>
+<h2 id="实战在驱动中使用定时器">实战：在驱动中使用定时器<a class="headerlink" href="#实战在驱动中使用定时器" title="链接到此章节">&para;</a></h2>
+<p>让我们用一个实际例子来总结这些时间管理机制。</p>
+<h3 id="场景led闪烁驱动">场景：LED闪烁驱动<a class="headerlink" href="#场景led闪烁驱动" title="链接到此章节">&para;</a></h3>
+<div class="language-c highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1"></a><a href="#__codelineno-13-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/module.h&gt;</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2"></a><a href="#__codelineno-13-2"><span class="linenos" data-linenos=" 2 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/timer.h&gt;</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3"></a><a href="#__codelineno-13-3"><span class="linenos" data-linenos=" 3 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/gpio/consumer.h&gt;</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4"></a><a href="#__codelineno-13-4"><span class="linenos" data-linenos=" 4 "></span></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/platform_device.h&gt;</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5"></a><a href="#__codelineno-13-5"><span class="linenos" data-linenos=" 5 "></span></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6"></a><a href="#__codelineno-13-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="k">struct</span><span class="w"> </span><span class="nc">blink_led</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7"></a><a href="#__codelineno-13-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpio_desc</span><span class="w"> </span><span class="o">*</span><span class="n">gpio</span><span class="p">;</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8"></a><a href="#__codelineno-13-8"><span class="linenos" data-linenos=" 8 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="n">timer</span><span class="p">;</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9"></a><a href="#__codelineno-13-9"><span class="linenos" data-linenos=" 9 "></span></a><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">led_on</span><span class="p">;</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10"></a><a href="#__codelineno-13-10"><span class="linenos" data-linenos="10 "></span></a><span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">;</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11"></a><a href="#__codelineno-13-11"><span class="linenos" data-linenos="11 "></span></a><span class="p">};</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12"></a><a href="#__codelineno-13-12"><span class="linenos" data-linenos="12 "></span></a>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13"></a><a href="#__codelineno-13-13"><span class="linenos" data-linenos="13 "></span></a><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">blink_timer_callback</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">timer_list</span><span class="w"> </span><span class="o">*</span><span class="n">timer</span><span class="p">)</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14"></a><a href="#__codelineno-13-14"><span class="linenos" data-linenos="14 "></span></a><span class="p">{</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15"></a><a href="#__codelineno-13-15"><span class="linenos" data-linenos="15 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">blink_led</span><span class="w"> </span><span class="o">*</span><span class="n">bled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">from_timer</span><span class="p">(</span><span class="n">bled</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16"></a><a href="#__codelineno-13-16"><span class="linenos" data-linenos="16 "></span></a>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17"></a><a href="#__codelineno-13-17"><span class="linenos" data-linenos="17 "></span></a><span class="w">    </span><span class="cm">/* 切换LED状态 */</span>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18"></a><a href="#__codelineno-13-18"><span class="linenos" data-linenos="18 "></span></a><span class="w">    </span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="p">;</span>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19"></a><a href="#__codelineno-13-19"><span class="linenos" data-linenos="19 "></span></a><span class="w">    </span><span class="n">gpiod_set_value</span><span class="p">(</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">gpio</span><span class="p">,</span><span class="w"> </span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="p">);</span>
+</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20"></a><a href="#__codelineno-13-20"><span class="linenos" data-linenos="20 "></span></a>
+</span><span id="__span-13-21"><a id="__codelineno-13-21" name="__codelineno-13-21"></a><a href="#__codelineno-13-21"><span class="linenos" data-linenos="21 "></span></a><span class="w">    </span><span class="cm">/* 重新设置定时器 */</span>
+</span><span id="__span-13-22"><a id="__codelineno-13-22" name="__codelineno-13-22"></a><a href="#__codelineno-13-22"><span class="linenos" data-linenos="22 "></span></a><span class="w">    </span><span class="n">mod_timer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">,</span>
+</span><span id="__span-13-23"><a id="__codelineno-13-23" name="__codelineno-13-23"></a><a href="#__codelineno-13-23"><span class="linenos" data-linenos="23 "></span></a><span class="w">              </span><span class="n">jiffies</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">interval_ms</span><span class="p">));</span>
+</span><span id="__span-13-24"><a id="__codelineno-13-24" name="__codelineno-13-24"></a><a href="#__codelineno-13-24"><span class="linenos" data-linenos="24 "></span></a><span class="p">}</span>
+</span><span id="__span-13-25"><a id="__codelineno-13-25" name="__codelineno-13-25"></a><a href="#__codelineno-13-25"><span class="linenos" data-linenos="25 "></span></a>
+</span><span id="__span-13-26"><a id="__codelineno-13-26" name="__codelineno-13-26"></a><a href="#__codelineno-13-26"><span class="linenos" data-linenos="26 "></span></a><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">blink_led_probe</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">platform_device</span><span class="w"> </span><span class="o">*</span><span class="n">pdev</span><span class="p">)</span>
+</span><span id="__span-13-27"><a id="__codelineno-13-27" name="__codelineno-13-27"></a><a href="#__codelineno-13-27"><span class="linenos" data-linenos="27 "></span></a><span class="p">{</span>
+</span><span id="__span-13-28"><a id="__codelineno-13-28" name="__codelineno-13-28"></a><a href="#__codelineno-13-28"><span class="linenos" data-linenos="28 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">blink_led</span><span class="w"> </span><span class="o">*</span><span class="n">bled</span><span class="p">;</span>
+</span><span id="__span-13-29"><a id="__codelineno-13-29" name="__codelineno-13-29"></a><a href="#__codelineno-13-29"><span class="linenos" data-linenos="29 "></span></a>
+</span><span id="__span-13-30"><a id="__codelineno-13-30" name="__codelineno-13-30"></a><a href="#__codelineno-13-30"><span class="linenos" data-linenos="30 "></span></a><span class="w">    </span><span class="n">bled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">devm_kzalloc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pdev</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">bled</span><span class="p">),</span><span class="w"> </span><span class="n">GFP_KERNEL</span><span class="p">);</span>
+</span><span id="__span-13-31"><a id="__codelineno-13-31" name="__codelineno-13-31"></a><a href="#__codelineno-13-31"><span class="linenos" data-linenos="31 "></span></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">bled</span><span class="p">)</span>
+</span><span id="__span-13-32"><a id="__codelineno-13-32" name="__codelineno-13-32"></a><a href="#__codelineno-13-32"><span class="linenos" data-linenos="32 "></span></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+</span><span id="__span-13-33"><a id="__codelineno-13-33" name="__codelineno-13-33"></a><a href="#__codelineno-13-33"><span class="linenos" data-linenos="33 "></span></a>
+</span><span id="__span-13-34"><a id="__codelineno-13-34" name="__codelineno-13-34"></a><a href="#__codelineno-13-34"><span class="linenos" data-linenos="34 "></span></a><span class="w">    </span><span class="cm">/* 获取GPIO */</span>
+</span><span id="__span-13-35"><a id="__codelineno-13-35" name="__codelineno-13-35"></a><a href="#__codelineno-13-35"><span class="linenos" data-linenos="35 "></span></a><span class="w">    </span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">gpio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">devm_gpiod_get</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pdev</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">GPIOD_OUT_LOW</span><span class="p">);</span>
+</span><span id="__span-13-36"><a id="__codelineno-13-36" name="__codelineno-13-36"></a><a href="#__codelineno-13-36"><span class="linenos" data-linenos="36 "></span></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">IS_ERR</span><span class="p">(</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">gpio</span><span class="p">))</span>
+</span><span id="__span-13-37"><a id="__codelineno-13-37" name="__codelineno-13-37"></a><a href="#__codelineno-13-37"><span class="linenos" data-linenos="37 "></span></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">PTR_ERR</span><span class="p">(</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">gpio</span><span class="p">);</span>
+</span><span id="__span-13-38"><a id="__codelineno-13-38" name="__codelineno-13-38"></a><a href="#__codelineno-13-38"><span class="linenos" data-linenos="38 "></span></a>
+</span><span id="__span-13-39"><a id="__codelineno-13-39" name="__codelineno-13-39"></a><a href="#__codelineno-13-39"><span class="linenos" data-linenos="39 "></span></a><span class="w">    </span><span class="cm">/* 初始化定时器 */</span>
+</span><span id="__span-13-40"><a id="__codelineno-13-40" name="__codelineno-13-40"></a><a href="#__codelineno-13-40"><span class="linenos" data-linenos="40 "></span></a><span class="w">    </span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">interval_ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span><span class="w">  </span><span class="cm">/* 500ms闪烁 */</span>
+</span><span id="__span-13-41"><a id="__codelineno-13-41" name="__codelineno-13-41"></a><a href="#__codelineno-13-41"><span class="linenos" data-linenos="41 "></span></a><span class="w">    </span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+</span><span id="__span-13-42"><a id="__codelineno-13-42" name="__codelineno-13-42"></a><a href="#__codelineno-13-42"><span class="linenos" data-linenos="42 "></span></a><span class="w">    </span><span class="n">timer_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="n">blink_timer_callback</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</span><span id="__span-13-43"><a id="__codelineno-13-43" name="__codelineno-13-43"></a><a href="#__codelineno-13-43"><span class="linenos" data-linenos="43 "></span></a>
+</span><span id="__span-13-44"><a id="__codelineno-13-44" name="__codelineno-13-44"></a><a href="#__codelineno-13-44"><span class="linenos" data-linenos="44 "></span></a><span class="w">    </span><span class="cm">/* 启动定时器 */</span>
+</span><span id="__span-13-45"><a id="__codelineno-13-45" name="__codelineno-13-45"></a><a href="#__codelineno-13-45"><span class="linenos" data-linenos="45 "></span></a><span class="w">    </span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">.</span><span class="n">expires</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jiffies</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">msecs_to_jiffies</span><span class="p">(</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">interval_ms</span><span class="p">);</span>
+</span><span id="__span-13-46"><a id="__codelineno-13-46" name="__codelineno-13-46"></a><a href="#__codelineno-13-46"><span class="linenos" data-linenos="46 "></span></a><span class="w">    </span><span class="n">add_timer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-13-47"><a id="__codelineno-13-47" name="__codelineno-13-47"></a><a href="#__codelineno-13-47"><span class="linenos" data-linenos="47 "></span></a>
+</span><span id="__span-13-48"><a id="__codelineno-13-48" name="__codelineno-13-48"></a><a href="#__codelineno-13-48"><span class="linenos" data-linenos="48 "></span></a><span class="w">    </span><span class="n">platform_set_drvdata</span><span class="p">(</span><span class="n">pdev</span><span class="p">,</span><span class="w"> </span><span class="n">bled</span><span class="p">);</span>
+</span><span id="__span-13-49"><a id="__codelineno-13-49" name="__codelineno-13-49"></a><a href="#__codelineno-13-49"><span class="linenos" data-linenos="49 "></span></a><span class="w">    </span><span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Blink LED driver loaded</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span id="__span-13-50"><a id="__codelineno-13-50" name="__codelineno-13-50"></a><a href="#__codelineno-13-50"><span class="linenos" data-linenos="50 "></span></a>
+</span><span id="__span-13-51"><a id="__codelineno-13-51" name="__codelineno-13-51"></a><a href="#__codelineno-13-51"><span class="linenos" data-linenos="51 "></span></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-13-52"><a id="__codelineno-13-52" name="__codelineno-13-52"></a><a href="#__codelineno-13-52"><span class="linenos" data-linenos="52 "></span></a><span class="p">}</span>
+</span><span id="__span-13-53"><a id="__codelineno-13-53" name="__codelineno-13-53"></a><a href="#__codelineno-13-53"><span class="linenos" data-linenos="53 "></span></a>
+</span><span id="__span-13-54"><a id="__codelineno-13-54" name="__codelineno-13-54"></a><a href="#__codelineno-13-54"><span class="linenos" data-linenos="54 "></span></a><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">blink_led_remove</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">platform_device</span><span class="w"> </span><span class="o">*</span><span class="n">pdev</span><span class="p">)</span>
+</span><span id="__span-13-55"><a id="__codelineno-13-55" name="__codelineno-13-55"></a><a href="#__codelineno-13-55"><span class="linenos" data-linenos="55 "></span></a><span class="p">{</span>
+</span><span id="__span-13-56"><a id="__codelineno-13-56" name="__codelineno-13-56"></a><a href="#__codelineno-13-56"><span class="linenos" data-linenos="56 "></span></a><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">blink_led</span><span class="w"> </span><span class="o">*</span><span class="n">bled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">platform_get_drvdata</span><span class="p">(</span><span class="n">pdev</span><span class="p">);</span>
+</span><span id="__span-13-57"><a id="__codelineno-13-57" name="__codelineno-13-57"></a><a href="#__codelineno-13-57"><span class="linenos" data-linenos="57 "></span></a>
+</span><span id="__span-13-58"><a id="__codelineno-13-58" name="__codelineno-13-58"></a><a href="#__codelineno-13-58"><span class="linenos" data-linenos="58 "></span></a><span class="w">    </span><span class="cm">/* 删除定时器 */</span>
+</span><span id="__span-13-59"><a id="__codelineno-13-59" name="__codelineno-13-59"></a><a href="#__codelineno-13-59"><span class="linenos" data-linenos="59 "></span></a><span class="w">    </span><span class="n">timer_delete_sync</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bled</span><span class="o">-&gt;</span><span class="n">timer</span><span class="p">);</span>
+</span><span id="__span-13-60"><a id="__codelineno-13-60" name="__codelineno-13-60"></a><a href="#__codelineno-13-60"><span class="linenos" data-linenos="60 "></span></a>
+</span><span id="__span-13-61"><a id="__codelineno-13-61" name="__codelineno-13-61"></a><a href="#__codelineno-13-61"><span class="linenos" data-linenos="61 "></span></a><span class="w">    </span><span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Blink LED driver unloaded</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span id="__span-13-62"><a id="__codelineno-13-62" name="__codelineno-13-62"></a><a href="#__codelineno-13-62"><span class="linenos" data-linenos="62 "></span></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-13-63"><a id="__codelineno-13-63" name="__codelineno-13-63"></a><a href="#__codelineno-13-63"><span class="linenos" data-linenos="63 "></span></a><span class="p">}</span>
+</span><span id="__span-13-64"><a id="__codelineno-13-64" name="__codelineno-13-64"></a><a href="#__codelineno-13-64"><span class="linenos" data-linenos="64 "></span></a>
+</span><span id="__span-13-65"><a id="__codelineno-13-65" name="__codelineno-13-65"></a><a href="#__codelineno-13-65"><span class="linenos" data-linenos="65 "></span></a><span class="cm">/* ... platform_driver定义 ... */</span>
+</span></code></pre></div>
+<h2 id="时间管理决策树">时间管理决策树<a class="headerlink" href="#时间管理决策树" title="链接到此章节">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1"></a><a href="#__codelineno-14-1"><span class="linenos" data-linenos=" 1 "></span></a>需要延时/定时？
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2"></a><a href="#__codelineno-14-2"><span class="linenos" data-linenos=" 2 "></span></a>├─ 极短延迟（&lt;10微秒）
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3"></a><a href="#__codelineno-14-3"><span class="linenos" data-linenos=" 3 "></span></a>│  └─ 用 ndelay/udelay（忙等待）
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4"></a><a href="#__codelineno-14-4"><span class="linenos" data-linenos=" 4 "></span></a>├─ 短延迟（10us - 1ms）
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5"></a><a href="#__codelineno-14-5"><span class="linenos" data-linenos=" 5 "></span></a>│  └─ 用 usleep_range（睡眠）
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6"></a><a href="#__codelineno-14-6"><span class="linenos" data-linenos=" 6 "></span></a>├─ 中等延迟（1ms - 1秒）
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7"></a><a href="#__codelineno-14-7"><span class="linenos" data-linenos=" 7 "></span></a>│  └─ 用 msleep 或 timer_list
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8"></a><a href="#__codelineno-14-8"><span class="linenos" data-linenos=" 8 "></span></a>├─ 长延迟（&gt;1秒）
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9"></a><a href="#__codelineno-14-9"><span class="linenos" data-linenos=" 9 "></span></a>│  └─ 用 timer_list 或 wait_queue
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10"></a><a href="#__codelineno-14-10"><span class="linenos" data-linenos="10 "></span></a>└─ 高精度需求（&lt;1us）
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11"></a><a href="#__codelineno-14-11"><span class="linenos" data-linenos="11 "></span></a>   └─ 用 hrtimer
+</span></code></pre></div>
+<h2 id="这一小节就到这里">这一小节就到这里<a class="headerlink" href="#这一小节就到这里" title="链接到此章节">&para;</a></h2>
+<p>Linux内核的时间管理是一套完整的体系，从基于滴答的<code>jiffies</code>，到高精度的<code>hrtimer</code>，满足不同场景的需求。</p>
+<p>对于大多数驱动代码：
+* <strong>短延迟</strong>用<code>usleep_range()</code>
+* <strong>定时任务</strong>用<code>timer_list</code>
+* <strong>极高精度</strong>才用<code>hrtimer</code></p>
+<p>下一节，我们会在实战中深入使用定时器，写一个完整的定时器驱动示例。</p>
+<hr />
+<h2 id="本章要点">本章要点<a class="headerlink" href="#本章要点" title="链接到此章节">&para;</a></h2>
+<ol>
+<li><strong>jiffies是内核的心跳计数器</strong>，精度受HZ限制（通常5-10ms）。</li>
+<li><strong>时间比较必须用宏</strong>（<code>time_after</code>等），因为jiffies会回绕。</li>
+<li><strong>Linux 7.0使用新的timer API</strong>：<code>timer_setup()</code>替代<code>init_timer()</code>，<code>from_timer()</code>替代<code>data</code>字段。</li>
+<li><strong><code>timer_delete_sync()</code>替代<code>del_timer_sync()</code></strong>，确保回调完成后才返回。</li>
+<li><strong>忙等待（udelay）用于极短延迟</strong>，睡眠（usleep_range/msleep）用于较长延迟。</li>
+<li><strong>hrtimer提供纳秒级精度</strong>，但使用复杂，大多数驱动用timer_list足够。</li>
+</ol>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="最后更新">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月10日 09:28:45 CST">2026年5月10日 09:28:45</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="创建日期">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月10日 09:28:45 CST">2026年5月10日 09:28:45</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+          
+          <a href="../04_mutex_semaphore/" class="md-footer__link md-footer__link--prev" aria-label="上一页: 信号量与互斥体：会睡觉的锁">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              <div class="md-ellipsis">
+                信号量与互斥体：会睡觉的锁
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../06_timer_practice/" class="md-footer__link md-footer__link--next" aria-label="下一页: Linux 7.0内核定时器实战指南：从timer_setup到完整驱动">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                Linux 7.0内核定时器实战指南：从timer_setup到完整驱动
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Charliechen - 保留所有权利
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Awesome-Embedded-Learning-Studio" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:725610365@qq.com" target="_blank" rel="noopener" title="发送邮件" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M536.4-26.3c9.8-3.5 20.6-1 28 6.3s9.8 18.2 6.3 28l-178 496.9c-5 13.9-18.1 23.1-32.8 23.1-14.2 0-27-8.6-32.3-21.7l-64.2-158c-4.5-11-2.5-23.6 5.2-32.6l94.5-112.4c5.1-6.1 4.7-15-.9-20.6s-14.6-6-20.6-.9l-112.4 94.3c-9.1 7.6-21.6 9.6-32.6 5.2L38.1 216.8c-13.1-5.3-21.7-18.1-21.7-32.3 0-14.7 9.2-27.8 23.1-32.8z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.sections", "navigation.path", "navigation.indexes", "navigation.tabs", "navigation.tabs.sticky", "navigation.prune", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link", "content.tooltips", "content.action.edit", "content.action.view"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

@@ -577,6 +577,50 @@
          <lastmod>2026-05-12</lastmod>
     </url>
     <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/01_concurrency_basics/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/02_atomic_operations/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/03_spinlocks/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/04_mutex_semaphore/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/05_time_management/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/06_timer_practice/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/07_interrupt_basics/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/08_interrupt_practice/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/09_blocking_io/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/10_nonblocking_io/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
+         <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/core-functional/11_async_notification/</loc>
+         <lastmod>2026-05-12</lastmod>
+    </url>
+    <url>
          <loc>https://awesome-embedded-learning-studio.github.io/imx-forge/tutorial/kernel/mainline/</loc>
          <lastmod>2026-05-12</lastmod>
     </url>
