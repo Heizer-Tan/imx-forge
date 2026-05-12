@@ -22,10 +22,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -q ${TOOLCHAIN_URL} -O toolchain.tar.xz \
-    && tar -xf toolchain.tar.xz \
+COPY toolchain.tar.xz /toolchain.tar.xz
+RUN tar -xf /toolchain.tar.xz \
     && mv arm-gnu-toolchain-${TOOLCHAIN_VERSION}-x86_64-arm-none-linux-gnueabihf /opt/arm-gnu-toolchain \
-    && rm toolchain.tar.xz \
+    && rm /toolchain.tar.xz \
     && rm -rf /opt/arm-gnu-toolchain/share/doc
 
 # ============================================
@@ -77,6 +77,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     ccache \
+    unzip \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
